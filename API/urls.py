@@ -19,7 +19,7 @@ from django.urls import path
 from API import views
 
 urlpatterns = [
-    path('facebook', views.Upload_image_to_facebook.as_view()),
-    path('youtube', views.Upload_video_to_youtube.as_view()),
-    path('instagram', views.Upload_image_to_instagram.as_view()),
+    path('upload', views.Upload.as_view()),
+    # path('upload_image', views.Upload_image.as_view()),
+   
 ]
