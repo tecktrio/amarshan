@@ -27,8 +27,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/day',
+        'user': '60/day'
+    }
+}
 # Application definition
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'project_amarsha.urls'
 
@@ -124,6 +135,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ACCESS_TOKEN_FACEBOOK_PAGE = "EAALB1npj3f4BACJ4k7rHvTTlPydj1WyootFq3ENfNSATiQreYHb7O4Y8ggdTDOUdviVnAZCrCXavJjlIVrX7B44lz4ZCuSRKSLrNWWdQ7ZC8J84j56qTJaZBqb566ZCZC1zwPZAhZCGMHPMzKCEZCB2rokZAgwHcZAT0ZAAJSra0Fv4itNkbIRCQaLZByYmpy3sWZBo28ZD"
+# ACCESS_TOKEN_FACEBOOK_PAGE = "EAALB1npj3f4BAB7pCDHGW0cRKkV288QRcMWZA9v7bo08NVqEBSZAP25hhlIXS8eZBpOHwGZBGCFO92gvGSdXKLUGs2k0ynIPXPo32WwZCLBGBV5q8l03uRWgLgpyHrUFlPpCUnZAnJUeu5cSslS3wqZAGnCHhW6NYKoqoacznDRlZBr3r8ZABYKomqtGxdOYZCEmsZD"
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  101200166274775
+# AWS_CLIENT_ACCESS_KEY = "AKIA4VO2ARB3GD7FP2KM"
+# AWS_CLIENT_SECRET_KEY = "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"
+# AWS_BUCKET_NAME = "tecktrio-portfolio"

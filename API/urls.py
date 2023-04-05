@@ -20,6 +20,11 @@ from API import views
 
 urlpatterns = [
     path('upload', views.Upload.as_view()),
-    # path('upload_image', views.Upload_image.as_view()),
+    path('donations', views.Donation_content.as_view()),
+    path('featured', views.Featured_content.as_view()),
+    
+    path('featured/<int:id>', views.Featured_content.as_view()),
+    
+    
    
 ]
