@@ -11,13 +11,14 @@ from API.models import Featured
 from API.serializers import FeaturedContent_Serializer
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
+from django.http import JsonResponse
+
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request):
-        donation_type = request.POST.get('donation_type')
-        donation_content = Donations.objects.filter(donation_type = donation_type)
+        donation_content = Donations.objects.all()
         serialized_content = DonationContent_Serializer(donation_content,many = True)
-        return Response({"donation_content":serialized_content.data})
+        return JsonResponse({"donation_content":serialized_content.data})
     def post(self,request):
         media_url = request.data['media_url']
         media_type = request.data['media_type']
@@ -27,7 +28,7 @@ class Donation_content(APIView):
         location = request.data['location']
         donation_type = request.data['donation_type']
         Donations.objects.create(media_url=media_url,media_type=media_type,target=target,title=title,description=description,location=location,donation_type=donation_type).save()
-        return Response({'donation_content':'done'})
+        return JsonResponse({'donation_content':'done'})
     
 class Featured_content(APIView):
     def post(self,request):
@@ -38,24 +39,18 @@ class Featured_content(APIView):
         description = request.data['description']
         location = request.data['location']
         Featured.objects.create(media_url=media_url,profile_image_url=profile_image_url,profile_username=profile_username,organisation=organisation,description=description,location=location).save()
-        return Response({"status":"done"})
+        return JsonResponse({"status":"done"})
     def get(self,request):
-        try:
-            if request.data['isadmin'] == True:
-                featured_content = Featured.objects.all()
-                return Response({'featured data':featured_content})
-        except:
-            return Response({"status",'couldnt fetch the data,body should contain isadmin'})
         featured_content = Featured.objects.filter(running_status = True)
         serialized_content = FeaturedContent_Serializer(featured_content,many=True)
-        return Response({"featured_content":serialized_content.data})
+        return JsonResponse({"featured_content":serialized_content.data})
     def put(self,request,id):
         featured_content = Featured.objects.all()
         featured_content.update(running_status = False)
         this_content = Featured.objects.get(id = id)
         this_content.running_status = True
         this_content.save()
-        return Response({'status':'done'})
+        return JsonResponse({'status':'done'})
     
 class Upload(APIView):
     throttle_classes = [UserRateThrottle]
@@ -67,16 +62,22 @@ class Upload(APIView):
         => VIDEO  : platform, media_type, video_url, title, description, tag
         => IMAGE  : platform, media_type, image, caption
         '''
-        platform = request.data['platform']
-        media_type = request.data['media_type']
-        platform_list = platform.split(',')
+        try:
+            platform = request.data['platform']
+            media_type = request.data['media_type']
+            platform_list = platform.split(',')
+        except:
+            return Response({'Required fields':'platform, media_type'})
         social_media = Social_Media()
         
         if media_type == "VIDEO":
-            video_url = request.data['video_url']
-            title = request.data['title']
-            description = request.data['description']
-            tag = request.data['tag']
+            try:
+                video_url = request.data['video_url']
+                title = request.data['title']
+                description = request.data['description']
+                tag = request.data['tag']
+            except:
+                return JsonResponse({"Required fields":"video_url, title, description, tag"})
             
             # video_url = social_media.Upload_file_to_aws(video_url,title)
             
@@ -88,8 +89,11 @@ class Upload(APIView):
                 self.status = social_media.Upload_video_to_youtube(video_url,title,description,tag) 
                 
         elif media_type == "IMAGE":
-            image = request.data['image']
-            caption = request.data['caption']
+            try:
+                image = request.data['image']
+                caption = request.data['caption']
+            except:
+                return JsonResponse({'Required fields':'image, caption'})
             
             image_url = social_media.Upload_file_to_aws(image,title)
             
@@ -97,18 +101,20 @@ class Upload(APIView):
                 self.status = social_media.Upload_image_to_instagram(image_url=image_url,caption=caption)
             if 'facebook' in platform_list:
                 self.status = social_media.Upload_image_to_facebook(image_url,caption)
-        return Response({"status":self.status})
+        return JsonResponse({"status":self.status})
 
     def get(self,request):
         '''Listen to the get request for the endpoint upload'''
-        return Response({"The method is not accessble. please try post using the fields :","For video => * video_url, * title, * description, * tag, * platform, * media type.","For Image =>* image, *caption, *platform, media_type"})
+        return JsonResponse({"The method is not accessble. please try post using the fields :","For video => * video_url, * title, * description, * tag, * platform, * media type.","For Image =>* image, *caption, *platform, media_type"})
     
 # Social Media access
 class Social_Media:
     def uploading_thread_method(self,video_container_id,access_token,page_id):
+        count = 0
         while requests.get("https://graph.facebook.com/v10.0/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
-            print('proccessing...')
-            time.sleep(3)
+            print(count, 'seconds',end='\r')
+            count += 1
+            time.sleep(1)
 
         print('Making the video public...')
         post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,video_container_id,access_token)
@@ -120,19 +126,23 @@ class Social_Media:
         '''Required parameter :
         => video_url, title
         '''
+        if video_url is None:
+            return Response({"Input Error":"video url cannot be empty and it should be valid"})
         page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
         access_token = ACCESS_TOKEN_FACEBOOK_PAGE
         get_url = "https://graph.facebook.com/v10.0/{}/media?video_url={}&caption={}&media_type={}&access_token={}".format(page_id,video_url,title,"VIDEO",access_token)
-        print('Requesting for the image container id...')
+        print('Requesting for the video container id for instagram ...')
         response = requests.post(get_url)
         print(response.json())
         video_container_id = int(response.json().get('id'))
+        if video_container_id is None:
+            return JsonResponse({'status':'failed to get the container id from graph api'})
         print('Uploaded successfully...')
         print('image container id  : ',video_container_id)
         
         threading.Thread(target=self.uploading_thread_method,args=(video_container_id,access_token,page_id)).start()
 
-        print("The video will be posted to facebook page successfully after completing the processing....")
+        print("The video will be posted to instagram account successfully after completing the processing....")
         return 
 
     def Upload_image_to_instagram(self,image_url,caption):
@@ -150,7 +160,10 @@ class Social_Media:
         print(response.json())
         if response.json().get('id') is None:
             return 'failed'
-        image_container_id = int(response.json().get('id'))
+        try:
+            image_container_id = int(response.json().get('id'))
+        except:
+            return JsonResponse({"Error":"some unkown error occured"})
         print('image container id  : ',image_container_id)
         print('Trying to upload the post...')
         post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,image_container_id,access_token)
@@ -167,9 +180,22 @@ class Social_Media:
         '''
         page_id = FACEBOOK_PAGE_ID #facebook page id 
         access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        url = "https://graph.facebook.com/v10.0/{}/videos?file_url={}&access_token={}&title={}&description={}".format(page_id,video_url,access_token,title,description)
-        print('Trying to upload the post...')
-        response = requests.post(url)
+        print('''****************** DEBUg ****************
+        
+        page id :''',page_id,'''
+        video url : ''',video_url,'''
+        title : ''',title,'''
+        description : ''',description,'''
+        ''')
+        url = f"https://graph.facebook.com/{page_id}/videos"
+        print('Trying to upload the post to facebook page...')
+        data = {
+            "file_url":video_url,
+            "title":title,
+            "description":description,
+            "access_token":access_token
+        }
+        response = requests.post(url,json=data)
         print(response.json())
         print('post id : ',response.json().get('id'))
         if response.json().get('id') is None:
@@ -196,7 +222,15 @@ class Social_Media:
         '''Required parameters
         => video_url, title, description, tag
         '''
-        run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="yt2.mp4" '
+        chuck_size = 256
+        downloaded_video = requests.get(video_url,stream=True)
+        print('downloading',end="")
+        os.remove('live_yt.mp4')
+        with open('live_yt.mp4',"wb") as f:
+            for chunk in downloaded_video.iter_content(chunk_size=chuck_size):
+                f.write(chunk)
+                print('.',end="")
+        run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="live_yt.mp4" '
         print(run)
         os.system(run)
         return 'done'
