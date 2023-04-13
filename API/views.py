@@ -9,10 +9,81 @@ from API.models import Donations
 from API.serializers import DonationContent_Serializer
 from API.models import Featured
 from API.serializers import FeaturedContent_Serializer
+from API.models import Users
+from API.serializers import User_Serializer
+from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
+from django.core.mail import send_mail,EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.http import JsonResponse
 
+class Login(APIView):
+    def post(self,request):
+        try:
+            email = request.data['email']
+            password = request.data['password']
+            login_type = request.data['login_type']
+        except:
+            return JsonResponse({'Required fields :':'email, password, login_type'})
+        if login_type == 'swe':
+            if Users.objects.filter(email=email).exists():
+                user= Users.objects.get(email=email)
+                if user.password == password:
+                    serialized_user_data = User_Serializer(user)
+                    return JsonResponse({'status_code':'success','user':serialized_user_data.data})
+                return JsonResponse({'status_code':'failed','error':'incorrect password'})
+            return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
+class SignUp(APIView):
+
+    def post(self,request):
+        try:
+            display_name = request.data['display_name']
+            email= request.data['email']
+            password= request.data['password']
+            profile_url = request.data['profile_url']
+            login_type = request.data['login_type']
+        except:
+            return JsonResponse({'Required fields :':'display_name, email, password, profile_url, login_type'})
+        
+        user_exist_status = Users.objects.filter(email = email).exists()
+        if not user_exist_status:
+            Users.objects.create(display_name=display_name,email=email,password=password,profile_url=profile_url,login_type=login_type).save()
+            return JsonResponse({'status':'user created successfully','status_code':'success'})
+        else:
+            return JsonResponse({"error":"user email id already exist.",'status_code':"failed"})
+    
+class Email(APIView):
+    def post(self,request):
+        try:
+            subject = request.data['subject']
+            message = request.data['message']
+            recipient_email = request.data['recipient_email']
+            template_model = request.data['template_model']
+        except:
+            return JsonResponse({'Required fields : ':'subject, message, recipient_email, template_model (otp, message)'})
+        # email_from = EMAIL_HOST_USER
+        # recipient_list = [recipient_email, ]
+        # send_mail( subject, message, email_from, recipient_list )
+        try:
+            if template_model =='otp':
+                html_content = render_to_string('mail/otp.html',{'otp':message})
+            if template_model == 'message':
+                html_content = render_to_string('mail/message.html',{'message':message})
+            text_content = strip_tags(html_content)
+            email = EmailMultiAlternatives(
+                subject,
+                text_content,
+                EMAIL_HOST_USER,
+                [recipient_email]
+            )
+            email.attach_alternative(html_content,'text/html')
+            email.send()
+        except:
+            return JsonResponse({'error':'unkown error, mail not send','status_code':'failed'})
+        return JsonResponse({'status':'mail send successfully','status_code':'success'})
+        
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request):
@@ -163,7 +234,8 @@ class Social_Media:
         try:
             image_container_id = int(response.json().get('id'))
         except:
-            return JsonResponse({"Error":"some unkown error occured"})
+            return JsonResponse
+        ({"Error":"some unkown error occured"})
         print('image container id  : ',image_container_id)
         print('Trying to upload the post...')
         post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,image_container_id,access_token)

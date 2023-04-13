@@ -25,6 +25,8 @@ urlpatterns = [
     
     path('featured/<int:id>', views.Featured_content.as_view()),
     
-    
+    path('signup',views.SignUp.as_view()),
+    path('login',views.Login.as_view()),
+    path('email',views.Email.as_view()),
    
 ]

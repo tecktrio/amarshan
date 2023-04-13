@@ -1,17 +1,19 @@
 from django.db import models
-
+import datetime
 # Create your models here.
 
 class Users(models.Model):
-    username = models.CharField(max_length=30)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    display_name = models.CharField(max_length=30)
+    email = models.CharField(max_length=30)
     password = models.CharField(max_length=30)
     gender = models.CharField(choices=(('male','male'),('female','female'),('other','other')),max_length=30)
-    dob = models.DateField()
-    user_id = models.IntegerField()
-    donations_done = models.IntegerField()
-    donations_received = models.IntegerField()
+    dob = models.CharField(default="",max_length=50)
+    profile_url = models.CharField(max_length=500,default="")
+    login_type = models.CharField(max_length=50,default='google')
+    joining_date = models.DateField(default=datetime.datetime.now())
+    donations_done = models.IntegerField(default=0)
+    donations_received = models.IntegerField(default=0)
+    
     
 class Donations(models.Model):
     media_url = models.CharField(max_length=500)

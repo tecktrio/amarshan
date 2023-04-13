@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-urroi2ak8^c@0pe=6@uh$&xwemkt&h&zl)qti5&yl=(54q*3_8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
@@ -67,7 +67,7 @@ ROOT_URLCONF = 'project_amarsha.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,3 +140,9 @@ FACEBOOK_PAGE_ID =  101200166274775
 # AWS_CLIENT_ACCESS_KEY = "AKIA4VO2ARB3GD7FP2KM"
 # AWS_CLIENT_SECRET_KEY = "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"
 # AWS_BUCKET_NAME = "tecktrio-portfolio"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'amalpullan4@gmail.com'#sender's email-id
+EMAIL_HOST_PASSWORD = 'fruvytulnekoeqnp'#password associated with above email-id
