@@ -35,3 +35,17 @@ class Featured(models.Model):
     location = models.CharField(max_length=100)
     running_status = models.BooleanField(max_length=100,default=False)
 
+
+#shopping 
+class Products(models.Model):
+    name = models.CharField(max_length=100,default='')
+    category = models.CharField(max_length=100,default='')
+    price = models.IntegerField(max_length=50,default=0)
+    description = models.CharField(max_length=300,default='')
+    image_1_url = models.CharField(max_length=300)
+    image_2_url = models.CharField(max_length=300)
+    image_3_url = models.CharField(max_length=300)
+    image_4_url = models.CharField(max_length=300)
+    rating = models.CharField(max_length=30)
+    
+    

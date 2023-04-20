@@ -19,14 +19,24 @@ from django.urls import path
 from API import views
 
 urlpatterns = [
+    path('', views.root.as_view()),
+    # Admin
     path('upload', views.Upload.as_view()),
+    
+    
+    # User
     path('donations', views.Donation_content.as_view()),
     path('featured', views.Featured_content.as_view()),
-    
     path('featured/<int:id>', views.Featured_content.as_view()),
-    
     path('signup',views.SignUp.as_view()),
     path('login',views.Login.as_view()),
     path('email',views.Email.as_view()),
-   
+    
+    # Shopping
+    #for post request ( add product )
+    path('shopping/products',views.Handle_Products.as_view()),
+    #get request
+    path('shopping/products/<str:filter>',views.Handle_Products.as_view()),
+    
+
 ]

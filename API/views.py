@@ -1,6 +1,8 @@
 import os
+import smtplib
 import time
 import threading
+from django.shortcuts import redirect
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -11,6 +13,8 @@ from API.models import Featured
 from API.serializers import FeaturedContent_Serializer
 from API.models import Users
 from API.serializers import User_Serializer
+from API.models import Products
+from API.serializers import Product_Serializer
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
@@ -19,6 +23,11 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.http import JsonResponse
 
+class root(APIView):
+    def get(self,request):
+        return Response({'welcome to amarshan api. please contact bshootdevelopers@gmail.com for any help, endpoints of this url for testing : email, login, signup, donations, upload, featured'})
+    def post(self,request):
+        return Response({'you are just a kid, you are not allowed to send a post request to this url'})
 class Login(APIView):
     def post(self,request):
         try:
@@ -35,8 +44,10 @@ class Login(APIView):
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
+    def get(self,request):
+                return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+        
 class SignUp(APIView):
-
     def post(self,request):
         try:
             display_name = request.data['display_name']
@@ -53,7 +64,9 @@ class SignUp(APIView):
             return JsonResponse({'status':'user created successfully','status_code':'success'})
         else:
             return JsonResponse({"error":"user email id already exist.",'status_code':"failed"})
-    
+    def get(self,request):
+                return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+     
 class Email(APIView):
     def post(self,request):
         try:
@@ -68,39 +81,76 @@ class Email(APIView):
         # send_mail( subject, message, email_from, recipient_list )
         try:
             if template_model =='otp':
-                html_content = render_to_string('mail/otp.html',{'otp':message})
+                try:
+                    html_content = render_to_string('mail/otp.html',{'otp':message})
+                except:
+                    return JsonResponse({'error':'render to string error, mail not send','status_code':'failed'})
             if template_model == 'message':
                 html_content = render_to_string('mail/message.html',{'message':message})
             text_content = strip_tags(html_content)
-            email = EmailMultiAlternatives(
-                subject,
-                text_content,
-                EMAIL_HOST_USER,
-                [recipient_email]
-            )
-            email.attach_alternative(html_content,'text/html')
+            
+            try:
+                email = EmailMultiAlternatives(
+                    subject,
+                    text_content,
+                    EMAIL_HOST_USER,
+                    [recipient_email]
+                )
+            except:
+                return JsonResponse({'error':'email error, mail not send','status_code':'failed'})
+            
+            try:
+                email.attach_alternative(html_content,'text/html')
+            except Exception:
+                return JsonResponse({'email attachment failed'})
+            
             email.send()
-        except:
+            
+        except Exception as e:
+            print(e)
             return JsonResponse({'error':'unkown error, mail not send','status_code':'failed'})
         return JsonResponse({'status':'mail send successfully','status_code':'success'})
-        
+    def get(self,request):
+                return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+     
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request):
         donation_content = Donations.objects.all()
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
-    def post(self,request):
-        media_url = request.data['media_url']
-        media_type = request.data['media_type']
-        target = request.data['target']
-        title = request.data['title']
-        description = request.data['description']
-        location = request.data['location']
-        donation_type = request.data['donation_type']
-        Donations.objects.create(media_url=media_url,media_type=media_type,target=target,title=title,description=description,location=location,donation_type=donation_type).save()
-        return JsonResponse({'donation_content':'done'})
-    
+    # def post(self,request):
+    #     media_url = request.data['media_url']
+    #     media_type = request.data['media_type']
+    #     target = request.data['target']
+    #     title = request.data['title']
+    #     description = request.data['description']
+    #     location = request.data['location']
+    #     donation_type = request.data['donation_type']
+    #     Donations.objects.create(media_url=media_url,media_type=media_type,target=target,title=title,description=description,location=location,donation_type=donation_type).save()
+    #     return JsonResponse({'donation_content':'done'})
+    def put(self,request):
+        try:
+            field = request.data['field']
+            id  = request.data['id']
+            value = request.data['value']
+        except:
+            return JsonResponse({'Required fields :':'field, value, id'})
+        
+        if field == 'media_url':
+            pass
+        if field == 'media_type':
+            pass
+        if field == 'target':
+            pass
+        if field == 'title':
+            pass
+        if field == 'description':
+            pass
+        if field == 'location':
+            pass
+        if field == 'donation_type':
+            pass
 class Featured_content(APIView):
     def post(self,request):
         media_url = request.data['media_url']
@@ -161,12 +211,12 @@ class Upload(APIView):
                 
         elif media_type == "IMAGE":
             try:
-                image = request.data['image']
+                image_url = request.data['image_url']
                 caption = request.data['caption']
             except:
                 return JsonResponse({'Required fields':'image, caption'})
             
-            image_url = social_media.Upload_file_to_aws(image,title)
+            # image_url = social_media.Upload_file_to_aws(image,title)
             
             if 'instagram' in platform_list:
                 self.status = social_media.Upload_image_to_instagram(image_url=image_url,caption=caption)
@@ -318,3 +368,77 @@ class Social_Media:
     #     return url
 
 
+
+class Handle_Products(APIView):
+    def get(self,request,filter):
+        
+        if filter == 'all':
+            filter_result = Products.objects.all()
+        else:
+            #category filtering
+            filter_result = Products.objects.filter(category=filter)
+            
+        serialized_data = Product_Serializer(filter_result,many=True)
+        return Response({'products':serialized_data.data})
+    def post(self,request):
+        try:
+            name = request.data['name']
+            price =request.data['price']
+            description = request.data['description']
+            category = request.data['category']
+            rating = request.data['rating']
+            image_1_url = request.data['image_1_url']
+            image_2_url = request.data['image_2_url']
+            image_3_url = request.data['image_3_url']
+            image_4_url = request.data['image_4_url']
+        except:
+            return Response({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
+        try:
+            if Products.objects.filter(name=name).exists():
+                return Response({'status_code':'failed','status':'product name already exist','solution':'use another product name with some changes'})
+            new_product = Products.objects.create(name=name,category=category,rating=rating,description=description,image_1_url=image_1_url,image_2_url=image_2_url,image_3_url=image_3_url,image_4_url=image_4_url,price=price)
+            new_product.save()
+        except:
+            return Response({'status_code':'failed','error':'could not create the product, fields or data error while trying to save the new product'})
+        return Response({'status':'new product added successfully','status_code':'success'})
+    def put(self,request,filter):
+        if Products.objects.filter(id=filter).exists():
+            try:
+                name = request.data['name']
+                price =request.data['price']
+                description = request.data['description']
+                category = request.data['category']
+                rating = request.data['rating']
+                image_1_url = request.data['image_1_url']
+                image_2_url = request.data['image_2_url']
+                image_3_url = request.data['image_3_url']
+                image_4_url = request.data['image_4_url']
+            except:
+                return Response({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
+        
+        
+            try:
+                product  = Products.objects.get(id=filter)
+                product.name = name
+                product.price = price
+                product.description = description
+                product.category = category 
+                product.rating = rating
+                product.image_1_url = image_1_url
+                product.image_2_url = image_2_url
+                product.image_3_url = image_3_url
+                product.image_4_url = image_4_url
+                
+                product.save()
+            except Exception as e:
+                return Response({'(status_code':'failed','error': str(e)})
+            
+            return Response({'status_code':'success','status':'product updated successfully'})
+        else:
+            return Response({'status_code':'failed','status':'The product id does not exists or product already deleted'})
+    def delete(self,request,filter):
+        if Products.objects.filter(id=filter).exists():
+            Products.objects.get(id=filter).delete()
+            return Response({'status_code':'success','status':'product deleted successfully'})
+        else:
+            return Response({'status_code':'failed','status':'The product id does not exists or product already deleted'})

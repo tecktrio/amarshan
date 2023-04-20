@@ -134,9 +134,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+ACCESS_TOKEN_FACEBOOK_PAGE = 'EAAH6QLlBi9gBAL1QofLYBVvm6mPQa3gB89M8CdAXvT70f2YZCCS1AVXukx1gXaVlagaqtPZAVZBeAjVSZC3fvsT4k2qHvkZCOCx9wpbHfBZCOijgVX6ItPKYm4MoZCdxz0zs6AzLfRYzXKBLdt2uyqdf3kHpb8nxtuzhJnyZA6hbUA9HZBH0f7BLmn7pgNJY0h3LoZCWfxLZAPUZAdzqVBFlNfTvAvMZColXRgyTgE8s1ZAkzWnwZDZD'
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
-FACEBOOK_PAGE_ID =  101200166274775
+FACEBOOK_PAGE_ID =  107774638943571 
 # AWS_CLIENT_ACCESS_KEY = "AKIA4VO2ARB3GD7FP2KM"
 # AWS_CLIENT_SECRET_KEY = "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"
 # AWS_BUCKET_NAME = "tecktrio-portfolio"
@@ -144,5 +144,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'amalpullan4@gmail.com'#sender's email-id
-EMAIL_HOST_PASSWORD = 'fruvytulnekoeqnp'#password associated with above email-id
+EMAIL_HOST_USER = 'coderboy.connect@gmail.com'#sender's email-id
+EMAIL_HOST_PASSWORD = 'rnoxkwdhhqfjfvps'#password associated with above email-id
