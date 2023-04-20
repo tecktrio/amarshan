@@ -15,6 +15,8 @@ from API.models import Users
 from API.serializers import User_Serializer
 from API.models import Products
 from API.serializers import Product_Serializer
+from API.models import Categories
+from API.serializers import Category_Serializer
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
@@ -396,6 +398,8 @@ class Handle_Products(APIView):
         try:
             if Products.objects.filter(name=name).exists():
                 return Response({'status_code':'failed','status':'product name already exist','solution':'use another product name with some changes'})
+            if not Categories.objects.filter(name=category).exists():
+                return Response({'status_code':'failed','error':'category do not exist'})
             new_product = Products.objects.create(name=name,category=category,rating=rating,description=description,image_1_url=image_1_url,image_2_url=image_2_url,image_3_url=image_3_url,image_4_url=image_4_url,price=price)
             new_product.save()
         except:
@@ -442,3 +446,22 @@ class Handle_Products(APIView):
             return Response({'status_code':'success','status':'product deleted successfully'})
         else:
             return Response({'status_code':'failed','status':'The product id does not exists or product already deleted'})
+        
+class Handle_categories(APIView):
+    def get(self,request):
+        categories = Categories.objects.all()
+        Serialized_categories = Category_Serializer(categories,many=True)
+        return Response({'categories':Serialized_categories.data})
+    def post(self,request):
+        try:
+            name = request.data['name']
+            description = request.data['description']
+        except Exception as e:
+            return Response({'status_code':'failed','Required Fields' : 'name, description'})
+        
+        if Categories.objects.filter(name=name).exists():
+            return Response({'status_code':'failed','status':'category already exist'})
+        new_category = Categories.objects.create(name=name,description=description)
+        new_category.save()
+        
+        return Response({'status_code':'success','status':'category created succesfully'})
