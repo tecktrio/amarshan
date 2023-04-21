@@ -17,6 +17,8 @@ from API.models import Products
 from API.serializers import Product_Serializer
 from API.models import Categories
 from API.serializers import Category_Serializer
+from API.models import Donation_categories
+from API.serializers import Donation_category_serializer
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
@@ -184,8 +186,8 @@ class Featured_content(APIView):
     
 class Upload(APIView):
     throttle_classes = [UserRateThrottle]
-
     status = 'failed'
+    
     def post(self,request):
         '''Listen to post request to the upload endpoint
         required parameter  :
@@ -195,9 +197,12 @@ class Upload(APIView):
         try:
             platform = request.data['platform']
             media_type = request.data['media_type']
+            category = request.data['category']
+            if not Donation_categories.objects.filter(name=category).exists():
+                return Response({'status_code':'failed','error':'category do not exist'})
             platform_list = platform.split(',')
         except:
-            return Response({'Required fields':'platform, media_type'})
+            return Response({'Required fields':'platform, media_type, category'})
         social_media = Social_Media()
         
         if media_type == "VIDEO":
@@ -231,6 +236,7 @@ class Upload(APIView):
                 self.status = social_media.Upload_image_to_instagram(image_url=image_url,caption=caption)
             if 'facebook' in platform_list:
                 self.status = social_media.Upload_image_to_facebook(image_url,caption)
+        
         return JsonResponse({"status":self.status})
 
     def get(self,request):
@@ -472,3 +478,20 @@ class Handle_categories(APIView):
         new_category.save()
         
         return Response({'status_code':'success','status':'category created succesfully'})
+    
+
+class Handle_Donation_categories(APIView):
+    def get(self,request):
+        category = Donation_categories.objects.all()
+        serialized_categories = Donation_category_serializer(category,many=True)
+        return Response({'status_code':'successs','categories':serialized_categories.data})
+    def post(self,request):
+        try:
+            name = request.data['name']
+            description= request.data['description']
+        except:
+            return Response({'status_code':'failed','Required fields':'name, description'})
+        if Donation_categories.objects.filter(name = name).exists():
+            return Response({'status_code':'failed', 'error':'category already exist'})
+        Donation_categories.objects.create(name=name, description= description).save()
+        return Response({'status_code':'success','status':'category created successfully'})

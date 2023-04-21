@@ -21,11 +21,12 @@ from API import views
 urlpatterns = [
     path('', views.root.as_view()),
     # Admin
-    path('upload', views.Upload.as_view()),
     
     
     # User
     path('donations', views.Donation_content.as_view()),
+    path('donations/upload', views.Upload.as_view()),
+    path('donations/categories',views.Handle_Donation_categories.as_view()),
     path('featured', views.Featured_content.as_view()),
     path('featured/<int:id>', views.Featured_content.as_view()),
     path('signup',views.SignUp.as_view()),

@@ -25,6 +25,11 @@ class Donations(models.Model):
     description = models.CharField(max_length=1000)
     location = models.CharField(max_length=100)
     donation_type = models.CharField(max_length=100,default="normal")
+    category = models.CharField(max_length=200,default='')
+
+class Donation_categories(models.Model):    
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
     
 class Featured(models.Model):
     media_url = models.CharField(max_length=500)
