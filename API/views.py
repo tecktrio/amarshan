@@ -162,18 +162,18 @@ class Featured_content(APIView):
         description = request.data['description']
         location = request.data['location']
         Featured.objects.create(media_url=media_url,profile_image_url=profile_image_url,profile_username=profile_username,organisation=organisation,description=description,location=location).save()
-        return JsonResponse({"status":"done"})
+        return JsonResponse({"status":"done",'status_code':'success'})
     def get(self,request):
         featured_content = Featured.objects.filter(running_status = True)
         serialized_content = FeaturedContent_Serializer(featured_content,many=True)
-        return JsonResponse({"featured_content":serialized_content.data})
+        return JsonResponse({"featured_content":serialized_content.data,'status_code':'success'})
     def put(self,request,id):
         featured_content = Featured.objects.all()
         featured_content.update(running_status = False)
         this_content = Featured.objects.get(id = id)
         this_content.running_status = True
         this_content.save()
-        return JsonResponse({'status':'done'})
+        return JsonResponse({'status':'done','status_code':'success'})
     
 class Upload(APIView):
     throttle_classes = [UserRateThrottle]
