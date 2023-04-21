@@ -10,7 +10,7 @@ class Users(models.Model):
     dob = models.CharField(default="",max_length=50)
     profile_url = models.CharField(max_length=500,default="")
     login_type = models.CharField(max_length=50,default='google')
-    joining_date = models.DateField(default=datetime.datetime.now())
+    joining_date = models.DateField()
     donations_done = models.IntegerField(default=0)
     donations_received = models.IntegerField(default=0)
     
