@@ -155,12 +155,16 @@ class Donation_content(APIView):
             pass
 class Featured_content(APIView):
     def post(self,request):
-        media_url = request.data['media_url']
-        profile_image_url = request.data['profile_image_url']
-        profile_username = request.data['profile_username']
-        organisation = request.data['organisation']
-        description = request.data['description']
-        location = request.data['location']
+        try:
+            media_url = request.data['media_url']
+            profile_image_url = request.data['profile_image_url']
+            profile_username = request.data['profile_username']
+            organisation = request.data['organisation']
+            description = request.data['description']
+            location = request.data['location']
+            
+        except:
+            return Response({'status_code':'failed','Required fields':'media_url, profile_image_url, profile_username, organisation, descripton, location'})
         Featured.objects.create(media_url=media_url,profile_image_url=profile_image_url,profile_username=profile_username,organisation=organisation,description=description,location=location).save()
         return JsonResponse({"status":"done",'status_code':'success'})
     def get(self,request):
@@ -168,11 +172,14 @@ class Featured_content(APIView):
         serialized_content = FeaturedContent_Serializer(featured_content,many=True)
         return JsonResponse({"featured_content":serialized_content.data,'status_code':'success'})
     def put(self,request,id):
-        featured_content = Featured.objects.all()
-        featured_content.update(running_status = False)
-        this_content = Featured.objects.get(id = id)
-        this_content.running_status = True
-        this_content.save()
+        try:
+            featured_content = Featured.objects.all()
+            featured_content.update(running_status = False)
+            this_content = Featured.objects.get(id = id)
+            this_content.running_status = True
+            this_content.save()
+        except:
+            return Response({'status_code':'failed','error':'add id of the featured image'})
         return JsonResponse({'status':'done','status_code':'success'})
     
 class Upload(APIView):

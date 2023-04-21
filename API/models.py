@@ -22,7 +22,7 @@ class Donations(models.Model):
     current_amount = models.IntegerField(default=0)
     heart = models.IntegerField(default=0)
     title = models.CharField(max_length=100)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=1000)
     location = models.CharField(max_length=100)
     donation_type = models.CharField(max_length=100,default="normal")
     
@@ -41,7 +41,7 @@ class Products(models.Model):
     name = models.CharField(max_length=100,default='')
     category = models.CharField(max_length=100,default='')
     price = models.IntegerField(max_length=50,default=0)
-    description = models.CharField(max_length=300,default='')
+    description = models.CharField(max_length=800,default='')
     image_1_url = models.CharField(max_length=300)
     image_2_url = models.CharField(max_length=300)
     image_3_url = models.CharField(max_length=300)
@@ -51,6 +51,6 @@ class Products(models.Model):
     
 class Categories(models.Model):
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=200,default='')
+    description = models.CharField(max_length=500,default='')
     
     
