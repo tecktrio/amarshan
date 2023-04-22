@@ -29,9 +29,9 @@ from django.http import JsonResponse
 
 class root(APIView):
     def get(self,request):
-        return Response({'welcome to amarshan api. please contact bshootdevelopers@gmail.com for any help, endpoints of this url for testing : email, login, signup, donations, upload, featured'})
+        return JsonResponse({'welcome to amarshan api. please contact bshootdevelopers@gmail.com for any help, endpoints of this url for testing : email, login, signup, donations, upload, featured'})
     def post(self,request):
-        return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+        return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
 class Login(APIView):
     def post(self,request):
         try:
@@ -49,7 +49,7 @@ class Login(APIView):
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
     def get(self,request):
-                return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+                return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
         
 class SignUp(APIView):
     def post(self,request):
@@ -69,8 +69,28 @@ class SignUp(APIView):
         else:
             return JsonResponse({"error":"user email id already exist.",'status_code':"failed"})
     def get(self,request):
-                return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+                return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
      
+    def put(self,request,email_id):
+        if Users.objects.filter(email=email_id).exists():
+            try:
+                display_name = request.data['display_name']
+                # email= request.data['email']
+                password= request.data['password']
+                profile_url = request.data['profile_url']
+                # login_type = request.data['login_type']
+            except:
+                return JsonResponse({'Required fields :':'display_name, password, profile_url'})
+            user  =  Users.objects.get(email=email_id)
+            user.display_name = display_name
+            # user.email = email
+            user.password = password
+            user.profile_url = profile_url
+            # user.login_type = login_type
+            user.save()
+            return JsonResponse({'status_code':'success','status':'user profile updated'})
+        else:
+            return JsonResponse({'status_code':'failed','error':'email id do not exist'})
 class Email(APIView):
     def post(self,request):
         try:
@@ -115,7 +135,7 @@ class Email(APIView):
             return JsonResponse({'error':'unkown error, mail not send','status_code':'failed'})
         return JsonResponse({'status':'mail send successfully','status_code':'success'})
     def get(self,request):
-                return Response({'you are just a kid, you are not allowed to send a post request to this url'})
+                return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
      
 #Endpoint to Upload File
 class Donation_content(APIView):
@@ -166,7 +186,7 @@ class Featured_content(APIView):
             location = request.data['location']
             
         except:
-            return Response({'status_code':'failed','Required fields':'media_url, profile_image_url, profile_username, organisation, descripton, location'})
+            return JsonResponse({'status_code':'failed','Required fields':'media_url, profile_image_url, profile_username, organisation, descripton, location'})
         Featured.objects.create(media_url=media_url,profile_image_url=profile_image_url,profile_username=profile_username,organisation=organisation,description=description,location=location).save()
         return JsonResponse({"status":"done",'status_code':'success'})
     def get(self,request):
@@ -199,10 +219,10 @@ class Upload(APIView):
             media_type = request.data['media_type']
             category = request.data['category']
             if not Donation_categories.objects.filter(name=category).exists():
-                return Response({'status_code':'failed','error':'category do not exist'})
+                return JsonResponse({'status_code':'failed','error':'category do not exist'})
             platform_list = platform.split(',')
         except:
-            return Response({'Required fields':'platform, media_type, category'})
+            return JsonResponse({'Required fields':'platform, media_type, category'})
         social_media = Social_Media()
         
         if media_type == "VIDEO":
@@ -263,7 +283,7 @@ class Social_Media:
         => video_url, title
         '''
         if video_url is None:
-            return Response({"Input Error":"video url cannot be empty and it should be valid"})
+            return JsonResponse({"Input Error":"video url cannot be empty and it should be valid"})
         page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
         access_token = ACCESS_TOKEN_FACEBOOK_PAGE
         get_url = "https://graph.facebook.com/v10.0/{}/media?video_url={}&caption={}&media_type={}&access_token={}".format(page_id,video_url,title,"VIDEO",access_token)
@@ -407,17 +427,17 @@ class Handle_Products(APIView):
             image_3_url = request.data['image_3_url']
             image_4_url = request.data['image_4_url']
         except:
-            return Response({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
+            return JsonResponse({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
         try:
             if Products.objects.filter(name=name).exists():
-                return Response({'status_code':'failed','status':'product name already exist','solution':'use another product name with some changes'})
+                return JsonResponse({'status_code':'failed','status':'product name already exist','solution':'use another product name with some changes'})
             if not Categories.objects.filter(name=category).exists():
-                return Response({'status_code':'failed','error':'category do not exist'})
+                return JsonResponse({'status_code':'failed','error':'category do not exist'})
             new_product = Products.objects.create(name=name,category=category,rating=rating,description=description,image_1_url=image_1_url,image_2_url=image_2_url,image_3_url=image_3_url,image_4_url=image_4_url,price=price)
             new_product.save()
         except:
-            return Response({'status_code':'failed','error':'could not create the product, fields or data error while trying to save the new product'})
-        return Response({'status':'new product added successfully','status_code':'success'})
+            return JsonResponse({'status_code':'failed','error':'could not create the product, fields or data error while trying to save the new product'})
+        return JsonResponse({'status':'new product added successfully','status_code':'success'})
     def put(self,request,filter):
         if Products.objects.filter(id=filter).exists():
             try:
@@ -431,7 +451,7 @@ class Handle_Products(APIView):
                 image_3_url = request.data['image_3_url']
                 image_4_url = request.data['image_4_url']
             except:
-                return Response({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
+                return JsonResponse({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
         
         
             try:
@@ -448,50 +468,50 @@ class Handle_Products(APIView):
                 
                 product.save()
             except Exception as e:
-                return Response({'(status_code':'failed','error': str(e)})
+                return JsonResponse({'(status_code':'failed','error': str(e)})
             
-            return Response({'status_code':'success','status':'product updated successfully'})
+            return JsonResponse({'status_code':'success','status':'product updated successfully'})
         else:
-            return Response({'status_code':'failed','status':'The product id does not exists or product already deleted'})
+            return JsonResponse({'status_code':'failed','status':'The product id does not exists or product already deleted'})
     def delete(self,request,filter):
         if Products.objects.filter(id=filter).exists():
             Products.objects.get(id=filter).delete()
-            return Response({'status_code':'success','status':'product deleted successfully'})
+            return JsonResponse({'status_code':'success','status':'product deleted successfully'})
         else:
-            return Response({'status_code':'failed','status':'The product id does not exists or product already deleted'})
+            return JsonResponse({'status_code':'failed','status':'The product id does not exists or product already deleted'})
         
 class Handle_categories(APIView):
     def get(self,request):
         categories = Categories.objects.all()
         Serialized_categories = Category_Serializer(categories,many=True)
-        return Response({'categories':Serialized_categories.data})
+        return JsonResponse({'categories':Serialized_categories.data})
     def post(self,request):
         try:
             name = request.data['name']
             description = request.data['description']
         except Exception as e:
-            return Response({'status_code':'failed','Required Fields' : 'name, description'})
+            return JsonResponse({'status_code':'failed','Required Fields' : 'name, description'})
         
         if Categories.objects.filter(name=name).exists():
-            return Response({'status_code':'failed','status':'category already exist'})
+            return JsonResponse({'status_code':'failed','status':'category already exist'})
         new_category = Categories.objects.create(name=name,description=description)
         new_category.save()
         
-        return Response({'status_code':'success','status':'category created succesfully'})
+        return JsonResponse({'status_code':'success','status':'category created succesfully'})
     
 
 class Handle_Donation_categories(APIView):
     def get(self,request):
         category = Donation_categories.objects.all()
         serialized_categories = Donation_category_serializer(category,many=True)
-        return Response({'status_code':'successs','categories':serialized_categories.data})
+        return JsonResponse({'status_code':'successs','categories':serialized_categories.data})
     def post(self,request):
         try:
             name = request.data['name']
             description= request.data['description']
         except:
-            return Response({'status_code':'failed','Required fields':'name, description'})
+            return JsonResponse({'status_code':'failed','Required fields':'name, description'})
         if Donation_categories.objects.filter(name = name).exists():
-            return Response({'status_code':'failed', 'error':'category already exist'})
+            return JsonResponse({'status_code':'failed', 'error':'category already exist'})
         Donation_categories.objects.create(name=name, description= description).save()
-        return Response({'status_code':'success','status':'category created successfully'})
+        return JsonResponse({'status_code':'success','status':'category created successfully'})
