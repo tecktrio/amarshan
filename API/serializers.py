@@ -39,3 +39,8 @@ class Notification_serializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = '__all__'
+
+class User_Address_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Users
+        fields = 'display_name, building_name, street_name, pincode, city, state, country'

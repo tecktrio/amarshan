@@ -21,6 +21,7 @@ from API.models import Donation_categories
 from API.serializers import Donation_category_serializer
 from API.models import Notification
 from API.serializers import Notification_serializer
+from API.serializers import User_Address_Serializer
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
@@ -186,7 +187,6 @@ class Featured_content(APIView):
             organisation = request.data['organisation']
             description = request.data['description']
             location = request.data['location']
-            
         except:
             return JsonResponse({'status_code':'failed','Required fields':'media_url, profile_image_url, profile_username, organisation, descripton, location'})
         Featured.objects.create(media_url=media_url,profile_image_url=profile_image_url,profile_username=profile_username,organisation=organisation,description=description,location=location).save()
@@ -196,16 +196,27 @@ class Featured_content(APIView):
         serialized_content = FeaturedContent_Serializer(featured_content,many=True)
         return JsonResponse({"featured_content":serialized_content.data,'status_code':'success'})
     def put(self,request,id):
-        try:
-            featured_content = Featured.objects.all()
-            featured_content.update(running_status = False)
-            this_content = Featured.objects.get(id = id)
-            this_content.running_status = True
-            this_content.save()
-        except:
-            return Response({'status_code':'failed','error':'add id of the featured image'})
-        return JsonResponse({'status':'done','status_code':'success'})
-    
+        if Featured.objects.filter(id=id).exists():
+            try:
+                featured_content = Featured.objects.all()
+                featured_content.update(running_status = False)
+                this_content = Featured.objects.get(id = id)
+                this_content.running_status = True
+                this_content.save()
+            except:
+                return Response({'status_code':'failed','error':'unknown error, could not save the changes'})
+            return JsonResponse({'status':'featured content updated or changed','status_code':'success'})
+        else:
+            return JsonResponse({'status_code':'failed','status':'please provide a valid id'})
+    def delete(self,request,id):
+        if Featured.objects.filter(id=id).exists():
+            try:
+                Featured.objects.get(id=id).delete()
+                return JsonResponse({'status_code':'success','status':'content deleted successfully'})
+            except:
+                return JsonResponse({'status_code':'failed','error':'unkown error, could not delete'})
+        else:
+            return JsonResponse({'status_code':'failed','error':'id does not exist'})
 class Upload(APIView):
     throttle_classes = [UserRateThrottle]
     status = 'failed'
@@ -547,3 +558,12 @@ class Handle_Notifications(APIView):
                 return JsonResponse({'status_code':'failed','error':e})
         else:
             return JsonResponse({'status_code':'failed','status':'notification id does not exist'})
+
+class Handle_Address(APIView):
+    def get(self,request,email_id):
+        if Users.objects.filter(email = email_id).exists():
+            user = Users.objects.get(email = email_id)
+            user_address_serialized = User_Address_Serializer(user)
+            return JsonResponse({'address':user_address_serialized.data,'status_code':'success'})
+        else:
+            return JsonResponse({'status':'email id does not exist','status_code':'failed'})

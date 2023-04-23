@@ -36,6 +36,7 @@ urlpatterns = [
     path('signup/<str:email_id>',views.SignUp.as_view()),
     path('login',views.Login.as_view()),
     path('email',views.Email.as_view()),
+    path('address/<str:email_id>',views.Handle_Address.as_view()),
     
     # Shopping
     #for post request ( add product )
