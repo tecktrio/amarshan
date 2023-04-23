@@ -84,8 +84,9 @@ class Login(APIView):
                 if user.password == password:
                     serialized_user_data = User_Serializer(user)
                     # storing the login details 
-                    # print(request.META['HTTP_USER_AGENT'])
-                    Login_details.objects.create(email = email).save()
+                    # device = request.data['device']
+                    # print('device_details :',device)
+                    Login_details.objects.create(email = email,device = 'device').save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})

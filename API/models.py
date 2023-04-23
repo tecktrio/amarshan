@@ -15,7 +15,11 @@
 from django.db import models
 import datetime
 
-
+def now():
+    now_utc = datetime.datetime.utcnow()
+    offset = datetime.datetime.now() - datetime.datetime.utcnow()
+    now_with_offset = now_utc + offset
+    return now_with_offset
 # Tables or Models
 
 # User model
@@ -27,7 +31,7 @@ class Users(models.Model):
     dob                 = models.CharField(default="",max_length=50)
     profile_url         = models.CharField(max_length=500,default="")
     login_type          = models.CharField(max_length=50,default='google')
-    joining_date        = models.DateTimeField(default=datetime.datetime.now())
+    joining_date        = models.DateTimeField(default=now())
     donations_done      = models.IntegerField(default=0)
     donations_received  = models.IntegerField(default=0)
     building_name       = models.CharField(max_length=50, default='')
@@ -42,7 +46,8 @@ class Users(models.Model):
     
 class Login_details(models.Model):
     email            = models.CharField(max_length=100)
-    login_time       = models.DateTimeField(default=datetime.datetime.now())
+    login_time       = models.DateTimeField(default=now())
+    device           = models.CharField(max_length=800)
     
 class Donations(models.Model):
     media_url       = models.CharField(max_length=500)
