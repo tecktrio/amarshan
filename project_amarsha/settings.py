@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'project_amarsha.middleware.Authenticate_User_Middleware',
 ]
 
 
@@ -92,7 +93,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'amarshan',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': '1234',
     }
 }
 
@@ -141,9 +142,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ACCESS_TOKEN_FACEBOOK_PAGE = 'EAAH6QLlBi9gBAL1QofLYBVvm6mPQa3gB89M8CdAXvT70f2YZCCS1AVXukx1gXaVlagaqtPZAVZBeAjVSZC3fvsT4k2qHvkZCOCx9wpbHfBZCOijgVX6ItPKYm4MoZCdxz0zs6AzLfRYzXKBLdt2uyqdf3kHpb8nxtuzhJnyZA6hbUA9HZBH0f7BLmn7pgNJY0h3LoZCWfxLZAPUZAdzqVBFlNfTvAvMZColXRgyTgE8s1ZAkzWnwZDZD'
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  107774638943571 
-# AWS_CLIENT_ACCESS_KEY = "AKIA4VO2ARB3GD7FP2KM"
-# AWS_CLIENT_SECRET_KEY = "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"
-# AWS_BUCKET_NAME = "tecktrio-portfolio"
+
+# Settings for otp and other mail services
+# you can only change the EMAIL_HOST_USER and  EMAIL_HOST_PASSWORD, you will get it from your gmail my account. search for apps and get the app email and password
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True

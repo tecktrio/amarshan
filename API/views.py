@@ -1,59 +1,108 @@
+'''
+This logic part is developed by amal benny. For any doughts you can contact bshootdevelopers@gmail.com
+'''
+
+# Neccessary Modules for this app
+
 import os
 import smtplib
 import time
 import threading
-from django.shortcuts import redirect
+import requests
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-import requests
-from API.models import Donations
-from API.serializers import DonationContent_Serializer
+
 from API.models import Featured
-from API.serializers import FeaturedContent_Serializer
 from API.models import Users
-from API.serializers import User_Serializer
 from API.models import Products
-from API.serializers import Product_Serializer
 from API.models import Categories
-from API.serializers import Category_Serializer
-from API.models import Donation_categories
-from API.serializers import Donation_category_serializer
 from API.models import Notification
+from API.models import Donation_categories
+from API.models import Donations
+from API.models import Login_details
+
+from API.serializers import DonationContent_Serializer
+from API.serializers import FeaturedContent_Serializer
+from API.serializers import User_Serializer
+from API.serializers import Product_Serializer
+from API.serializers import Category_Serializer
+from API.serializers import Donation_category_serializer
 from API.serializers import Notification_serializer
 from API.serializers import User_Address_Serializer
+
 from project_amarsha.settings import EMAIL_HOST_USER
-from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
-# import boto3
+from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
+from project_amarsha.settings import FACEBOOK_PAGE_ID
+from project_amarsha.settings import INSTAGRAM_BUSINESS_ACCOUNT_ID
+
 from django.core.mail import send_mail,EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.http import JsonResponse
+from django.shortcuts import render
+
+
+def error_404(request,e):
+    return render(request,'error/404.html')
+def error_500(request):
+    return render(request,'error/500.html')
+
+'''
+API for Amarshan a whole new platform for donations
+---------------------------------------------------
+'''
 
 class root(APIView):
     def get(self,request):
         return JsonResponse({'welcome to amarshan api. please contact bshootdevelopers@gmail.com for any help, endpoints of this url for testing : email, login, signup, donations, upload, featured'})
     def post(self,request):
         return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
+
+# Debugging
 class Login(APIView):
+    '''
+    Handles
+    -------
+    1. Login Request from Normal users
+    2. Validate the Login details
+    3. Verify the data 
+    4. Send proper Response for errors
+    5. store the login status of users
+    '''
     def post(self,request):
         try:
             email = request.data['email']
             password = request.data['password']
             login_type = request.data['login_type']
         except:
-            return JsonResponse({'Required fields :':'email, password, login_type'})
+            return JsonResponse({'Required fields':'email, password, login_type'})
         if login_type == 'swe':
             if Users.objects.filter(email=email).exists():
                 user= Users.objects.get(email=email)
                 if user.password == password:
                     serialized_user_data = User_Serializer(user)
+                    # storing the login details 
+                    # print(request.META['HTTP_USER_AGENT'])
+                    Login_details.objects.create(email = email).save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
+        elif login_type == 'swg':
+            if Users.objects.filter(email=email).exists():
+                user= Users.objects.get(email=email)
+                serialized_user_data = User_Serializer(user)
+                Login_details.objects.create(email = email).save()
+                return JsonResponse({'status_code':'success','user':serialized_user_data.data})
     def get(self,request):
-                return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
-        
+                return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})            
+    def put(self,request):
+                return JsonResponse({'you are just a kid, you are not allowed to send a put request to this url'})
+    def delete(self,request):
+                return JsonResponse({'you are just a kid, you are not allowed to send a delete request to this url'})
+            
+            
 class SignUp(APIView):
     def post(self,request):
         try:
@@ -64,7 +113,6 @@ class SignUp(APIView):
             login_type = request.data['login_type']
         except:
             return JsonResponse({'Required fields :':'display_name, email, password, profile_url, login_type'})
-        
         user_exist_status = Users.objects.filter(email = email).exists()
         if not user_exist_status:
             Users.objects.create(display_name=display_name,email=email,password=password,profile_url=profile_url,login_type=login_type).save()
@@ -73,7 +121,6 @@ class SignUp(APIView):
             return JsonResponse({"error":"user email id already exist.",'status_code':"failed"})
     def get(self,request):
                 return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
-     
     def put(self,request,email_id):
         if Users.objects.filter(email=email_id).exists():
             try:
@@ -94,6 +141,9 @@ class SignUp(APIView):
             return JsonResponse({'status_code':'success','status':'user profile updated'})
         else:
             return JsonResponse({'status_code':'failed','error':'email id do not exist'})
+    def delete(self,request):
+                return JsonResponse({'you are just a kid, you are not allowed to send a delete request to this url'})
+            
 class Email(APIView):
     def post(self,request):
         try:
@@ -139,23 +189,16 @@ class Email(APIView):
         return JsonResponse({'status':'mail send successfully','status_code':'success'})
     def get(self,request):
                 return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
-     
+    def delete(self,request):
+                return JsonResponse({'you are just a kid, you are not allowed to send a delete request to this url'})
+            
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request):
         donation_content = Donations.objects.all()
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
-    # def post(self,request):
-    #     media_url = request.data['media_url']
-    #     media_type = request.data['media_type']
-    #     target = request.data['target']
-    #     title = request.data['title']
-    #     description = request.data['description']
-    #     location = request.data['location']
-    #     donation_type = request.data['donation_type']
-    #     Donations.objects.create(media_url=media_url,media_type=media_type,target=target,title=title,description=description,location=location,donation_type=donation_type).save()
-    #     return JsonResponse({'donation_content':'done'})
+
     def put(self,request):
         try:
             field = request.data['field']
@@ -178,6 +221,14 @@ class Donation_content(APIView):
             pass
         if field == 'donation_type':
             pass
+        
+    def delete(self,request,id):
+        if Donations.objects.filter(id=id).exists():
+            Donations.objects.filter(id=id).delete()
+            return JsonResponse({'status_code':'success','status':'Donation added successfully'})
+        else:
+            return JsonResponse({'status_code':'failed','error':'Donation id does not exist'})
+        
 class Featured_content(APIView):
     def post(self,request):
         try:
@@ -217,9 +268,11 @@ class Featured_content(APIView):
                 return JsonResponse({'status_code':'failed','error':'unkown error, could not delete'})
         else:
             return JsonResponse({'status_code':'failed','error':'id does not exist'})
+        
+        
 class Upload(APIView):
     throttle_classes = [UserRateThrottle]
-    status = 'failed'
+    status = False
     
     def post(self,request):
         '''Listen to post request to the upload endpoint
@@ -229,55 +282,60 @@ class Upload(APIView):
         '''
         try:
             platform = request.data['platform']
-            media_type = request.data['media_type']
+            media_type = str(request.data['media_type']).upper()
             category = request.data['category']
+            location = request.data['location']
+            media_url = request.data['media_url']
+            title = request.data['title']
+            description = request.data['description']
+            
             if not Donation_categories.objects.filter(name=category).exists():
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
+            
             platform_list = platform.split(',')
         except:
-            return JsonResponse({'Required fields':'platform, media_type, category'})
+            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description'})
+        
+        
         social_media = Social_Media()
         
         if media_type == "VIDEO":
-            try:
-                video_url = request.data['video_url']
-                title = request.data['title']
-                description = request.data['description']
-                tag = request.data['tag']
-            except:
-                return JsonResponse({"Required fields":"video_url, title, description, tag"})
-            
-            # video_url = social_media.Upload_file_to_aws(video_url,title)
-            
             if 'instagram' in platform_list:
-                self.status = social_media.Upload_video_to_instagram(video_url,title)
+                self.status = social_media.Upload_video_to_instagram(media_url,title)
             if 'facebook' in platform_list:
-                self.status = social_media.Upload_video_to_facebook(video_url,title,description)
+                self.status = social_media.Upload_video_to_facebook(media_url,title,description)
             if 'youtube' in platform_list:
-                self.status = social_media.Upload_video_to_youtube(video_url,title,description,tag) 
+                self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
+            if 'amarshan' in platform_list:
+                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location) 
                 
         elif media_type == "IMAGE":
-            try:
-                image_url = request.data['image_url']
-                caption = request.data['caption']
-            except:
-                return JsonResponse({'Required fields':'image, caption'})
-            
-            # image_url = social_media.Upload_file_to_aws(image,title)
-            
             if 'instagram' in platform_list:
-                self.status = social_media.Upload_image_to_instagram(image_url=image_url,caption=caption)
+                self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
             if 'facebook' in platform_list:
-                self.status = social_media.Upload_image_to_facebook(image_url,caption)
+                self.status = social_media.Upload_image_to_facebook(media_url,title )
+            if 'amarshan' in platform_list:
+                try:                
+                    category = request.data['category']
+                except:
+                    return JsonResponse({"Required fields":"category"})
+                self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location) 
         
-        return JsonResponse({"status":self.status})
+        if self.status:
+            return JsonResponse({"status_code":'success','status':'donation content uploaded successfully'})
+        else:
+            return JsonResponse({"status_code":'failed'})
+            
 
     def get(self,request):
         '''Listen to the get request for the endpoint upload'''
         return JsonResponse({"The method is not accessble. please try post using the fields :","For video => * video_url, * title, * description, * tag, * platform, * media type.","For Image =>* image, *caption, *platform, media_type"})
     
 # Social Media access
+'''---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 class Social_Media:
+    
     def uploading_thread_method(self,video_container_id,access_token,page_id):
         count = 0
         while requests.get("https://graph.facebook.com/v10.0/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
@@ -289,8 +347,13 @@ class Social_Media:
         post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,video_container_id,access_token)
         response = requests.post(post_url)
         print('post id : ',response.json().get('id'))
-        return
+        return True
         
+        
+    '''
+     uploading video
+     -----------------------------------------------------------------------
+    '''
     def Upload_video_to_instagram(self,video_url,title):
         '''Required parameter :
         => video_url, title
@@ -312,38 +375,8 @@ class Social_Media:
         threading.Thread(target=self.uploading_thread_method,args=(video_container_id,access_token,page_id)).start()
 
         print("The video will be posted to instagram account successfully after completing the processing....")
-        return 
-
-    def Upload_image_to_instagram(self,image_url,caption):
-        '''
-        Required parameters :
-        => image_url, caption
-        '''
-        page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
-        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        get_url = "https://graph.facebook.com/v10.0/{}/media?image_url={}&access_token={}&caption={}".format(page_id,image_url,access_token,caption)
-        print('Requesting for the image container id...')
-        print('hitting on url : ',get_url)
-        # print(get_url)
-        response = requests.post(get_url)
-        print(response.json())
-        if response.json().get('id') is None:
-            return 'failed'
-        try:
-            image_container_id = int(response.json().get('id'))
-        except:
-            return JsonResponse
-        ({"Error":"some unkown error occured"})
-        print('image container id  : ',image_container_id)
-        print('Trying to upload the post...')
-        post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,image_container_id,access_token)
-        response = requests.post(post_url)
-        print('post id : ',response.json().get('id'))
-        if response.json().get('id') is not None:
-            return 'success'
-        else:
-            return 'failed'
-
+        return  True
+    
     def Upload_video_to_facebook(self,video_url,title,description):
         '''Required parameters
         => video_url, title, description
@@ -369,24 +402,9 @@ class Social_Media:
         print(response.json())
         print('post id : ',response.json().get('id'))
         if response.json().get('id') is None:
-            return 'failed'
+            return False
         else:
-            return 'success'
-
-    def Upload_image_to_facebook(self, image_url,caption):
-        '''Required parameters :
-        => image_url, caption
-        '''
-        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        page_id = FACEBOOK_PAGE_ID
-        response = requests.post("https://graph.facebook.com/{}/photos?access_token={}&url={}".format(page_id,access_token, image_url))
-        print(response.json())
-        if response.status_code == 200:
-            print('Post created successfully!')
-            return 'success'
-        else:
-            print('Error creating post:', response.json()['error']['message'])
-            return 'failed'
+            return True
         
     def Upload_video_to_youtube(self, video_url,title,description,tag):
         '''Required parameters
@@ -403,17 +421,87 @@ class Social_Media:
         run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="live_yt.mp4" '
         print(run)
         os.system(run)
-        return 'done'
+        return True
     
-    # def Upload_file_to_aws(self,file,file_name):
-    #     client = boto3.client('s3',aws_access_key_id=AWS_CLIENT_ACCESS_KEY,aws_secret_access_key=AWS_CLIENT_SECRET_KEY)
-    #     bucket_name = AWS_BUCKET_NAME
-    #     client.upload_file(file, bucket_name, file_name)
-    #     url = client.generate_presigned_url('get_object', Params={'Bucket': bucket_name, 'Key':file_name})
-    #     print('-'*30)
-    #     print("your file is available at this url: ",url)
-    #     print('-'*30)
-    #     return url
+    def Upload_video_to_amarshan(self, video_url,title,description,category,location):
+        try:
+            Donations.objects.create(
+                media_url = video_url,
+                media_type = 'VIDEO',
+                title = title, 
+                description = description,
+                category = category,
+                location=location
+            ).save()
+            return True
+        except:
+            return False
+
+    '''
+    Uploading image
+    ----------------------------------------------------------------
+    '''
+    def Upload_image_to_instagram(self,image_url,caption):
+        '''
+        Required parameters :
+        => image_url, caption
+        '''
+        page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
+        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
+        get_url = "https://graph.facebook.com/v10.0/{}/media?image_url={}&access_token={}&caption={}".format(page_id,image_url,access_token,caption)
+        print('Requesting for the image container id...')
+        print('hitting on url : ',get_url)
+        # print(get_url)
+        response = requests.post(get_url)
+        print(response.json())
+        if response.json().get('id') is None:
+            return False
+        try:
+            image_container_id = int(response.json().get('id'))
+        except:
+            return JsonResponse
+        ({"Error":"some unkown error occured"})
+        print('image container id  : ',image_container_id)
+        print('Trying to upload the post...')
+        post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,image_container_id,access_token)
+        response = requests.post(post_url)
+        print('post id : ',response.json().get('id'))
+        if response.json().get('id') is not None:
+            return True
+        else:
+            return False
+
+    def Upload_image_to_facebook(self, image_url,caption):
+        '''Required parameters :
+        => image_url, caption
+        '''
+        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
+        page_id = FACEBOOK_PAGE_ID
+        response = requests.post("https://graph.facebook.com/{}/photos?access_token={}&url={}".format(page_id,access_token, image_url))
+        print(response.json())
+        if response.status_code == 200:
+            print('Post created successfully!')
+            return True
+        else:
+            print('Error creating post:', response.json()['error']['message'])
+            return False
+        
+    def Upload_image_to_amarshan(self,image_url, title, description, category,location):
+        try:
+            Donations.objects.create(
+                media_url = image_url,
+                media_type = 'IMAGE',
+                title = title, 
+                description = description,
+                category = category,
+                location = location
+            ).save()
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        
+   
 
 
 

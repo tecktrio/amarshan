@@ -20,3 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('API.urls')),
 ]
+
+handler404 = 'API.views.error_404'
+handler500 = 'API.views.error_500'

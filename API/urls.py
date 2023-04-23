@@ -26,6 +26,7 @@ urlpatterns = [
     
     # User
     path('donations', views.Donation_content.as_view()),
+    path('donations/<int:id>', views.Donation_content.as_view()),
     path('donations/upload', views.Upload.as_view()),
     path('donations/categories',views.Handle_Donation_categories.as_view()),
     
@@ -47,5 +48,4 @@ urlpatterns = [
     path('notifications',views.Handle_Notifications.as_view()),
     path('notifications/<int:id>',views.Handle_Notifications.as_view()),
     
-
 ]
