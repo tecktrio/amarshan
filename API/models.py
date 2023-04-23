@@ -13,7 +13,12 @@ class Users(models.Model):
     joining_date = models.DateField()
     donations_done = models.IntegerField(default=0)
     donations_received = models.IntegerField(default=0)
-    
+    building_name = models.CharField(max_length=50, default='')
+    street_name = models.CharField(max_length=50, default='')
+    pincode = models.IntegerField(default=0)
+    city = models.CharField(max_length=50, default='')
+    state = models.CharField(max_length=50,default='')
+    country = models.CharField(max_length=50,default='')
     
 class Donations(models.Model):
     media_url = models.CharField(max_length=500)
@@ -26,6 +31,7 @@ class Donations(models.Model):
     location = models.CharField(max_length=100)
     donation_type = models.CharField(max_length=100,default="normal")
     category = models.CharField(max_length=200,default='')
+    status = models.CharField(max_length=200,default='pending',choices=(('pending','pending'),('approved','approved'),('not_approved','not_approved')))
 
 class Donation_categories(models.Model):    
     name = models.CharField(max_length=100)
@@ -58,3 +64,6 @@ class Categories(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=500,default='')
     
+class Notification(models.Model):
+    title = models.CharField(max_length=200)
+    message = models.CharField(max_length=1000)

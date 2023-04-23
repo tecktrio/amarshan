@@ -40,6 +40,8 @@ urlpatterns = [
     #get request
     path('shopping/products/<str:filter>',views.Handle_Products.as_view()),
     path('shopping/categories',views.Handle_categories.as_view()),
+    path('notifications',views.Handle_Notifications.as_view()),
+    path('notifications/<int:id>',views.Handle_Notifications.as_view()),
     
 
 ]

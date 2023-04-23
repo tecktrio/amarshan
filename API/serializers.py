@@ -6,6 +6,7 @@ from API.models import Users
 from API.models import Products
 from API.models import Categories
 from API.models import Donation_categories
+from API.models import Notification
 
 class DonationContent_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -32,4 +33,9 @@ class Category_Serializer(serializers.ModelSerializer):
 class Donation_category_serializer(serializers.ModelSerializer):
     class Meta:
         model = Donation_categories
+        fields = '__all__'
+        
+class Notification_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
         fields = '__all__'

@@ -19,6 +19,8 @@ from API.models import Categories
 from API.serializers import Category_Serializer
 from API.models import Donation_categories
 from API.serializers import Donation_category_serializer
+from API.models import Notification
+from API.serializers import Notification_serializer
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE,  FACEBOOK_PAGE_ID, INSTAGRAM_BUSINESS_ACCOUNT_ID
 # import boto3
@@ -515,3 +517,33 @@ class Handle_Donation_categories(APIView):
             return JsonResponse({'status_code':'failed', 'error':'category already exist'})
         Donation_categories.objects.create(name=name, description= description).save()
         return JsonResponse({'status_code':'success','status':'category created successfully'})
+
+class Handle_Notifications(APIView):
+    def get(self, request):
+        notifications = Notification.objects.all()
+        serialized_notifications = Notification_serializer(notifications,many=True)
+        return JsonResponse({'status_code':'success','notifications':serialized_notifications.data})
+    def post(self,request):
+        try:
+            try:
+                title = request.data['title']
+                message= request.data['message']
+            except:
+                return JsonResponse({'status_code':'failed','Required fields':'title , message'})
+            
+            if  Notification.objects.filter(title=title).exists():
+                return JsonResponse({'status_code':'failed','status':'the notification with the same title already exist. '})
+            new_request = Notification.objects.create(title = title, message = message)
+            new_request.save()
+            return JsonResponse({'status_code':'success','status':'notification created successfully'})
+        except Exception as e:
+            return JsonResponse({'status_code':'failed','error':e})
+    def delete(self,request,id):
+        if Notification.objects.filter(id=id).exists():
+            try:
+                Notification.objects.get(id=id).delete()
+                return JsonResponse({'status_code':'success','status':'notification deleted succesfully'})
+            except Exception as e:
+                return JsonResponse({'status_code':'failed','error':e})
+        else:
+            return JsonResponse({'status_code':'failed','status':'notification id does not exist'})
