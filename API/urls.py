@@ -19,6 +19,7 @@ from django.urls import path
 from API import views
 
 urlpatterns = [
+    # root or about
     path('', views.root.as_view()),
     # Admin
     
@@ -27,6 +28,8 @@ urlpatterns = [
     path('donations', views.Donation_content.as_view()),
     path('donations/upload', views.Upload.as_view()),
     path('donations/categories',views.Handle_Donation_categories.as_view()),
+    
+    # featured entpoints to control the featured data in server
     path('featured', views.Featured_content.as_view()),
     path('featured/<int:id>', views.Featured_content.as_view()),
     path('signup',views.SignUp.as_view()),
