@@ -286,7 +286,7 @@ class Upload(APIView):
             media_url = request.data['media_url']
             title = request.data['title']
             description = request.data['description']
-            target = request.data['target']
+            target = int(request.data['target'])
             
             if not Donation_categories.objects.filter(name=category).exists():
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
