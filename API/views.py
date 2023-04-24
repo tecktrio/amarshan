@@ -76,6 +76,7 @@ class Login(APIView):
             email = request.data['email']
             password = request.data['password']
             login_type = request.data['login_type']
+            # device = request.data['device']
         except:
             return JsonResponse({'Required fields':'email, password, login_type'})
         if login_type == 'swe':
@@ -84,7 +85,6 @@ class Login(APIView):
                 if user.password == password:
                     serialized_user_data = User_Serializer(user)
                     # storing the login details 
-                    # device = request.data['device']
                     # print('device_details :',device)
                     Login_details.objects.create(email = email,device = 'device').save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
@@ -200,28 +200,25 @@ class Donation_content(APIView):
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
-    def put(self,request):
+    def put(self,request,id):
         try:
-            field = request.data['field']
-            id  = request.data['id']
-            value = request.data['value']
+            current_amount = request.data['current_amount']
+            heart = request.data['heart']
         except:
-            return JsonResponse({'Required fields :':'field, value, id'})
+            return JsonResponse({'Required fields :':'current_amount, heart'})
         
-        if field == 'media_url':
-            pass
-        if field == 'media_type':
-            pass
-        if field == 'target':
-            pass
-        if field == 'title':
-            pass
-        if field == 'description':
-            pass
-        if field == 'location':
-            pass
-        if field == 'donation_type':
-            pass
+        if Donations.objects.filter(id=id).exists():
+            try:
+                current_donation = Donations.objects.get(id=id)
+                current_donation.current_amount = current_amount
+                current_donation.heart = heart
+                current_donation.save()
+                return JsonResponse(({'status_code':'success','status':'donation upated'}))
+            except:
+                
+                return JsonResponse(({'status_code':'failed','error':'could not save, invalid data'}))
+        else:
+            return JsonResponse(({'status_code':'failed','error':'id does not exist'}))
         
     def delete(self,request,id):
         if Donations.objects.filter(id=id).exists():
@@ -289,13 +286,14 @@ class Upload(APIView):
             media_url = request.data['media_url']
             title = request.data['title']
             description = request.data['description']
+            target = request.data['target']
             
             if not Donation_categories.objects.filter(name=category).exists():
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
             
             platform_list = platform.split(',')
         except:
-            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description'})
+            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description, target'})
         
         
         social_media = Social_Media()
@@ -308,7 +306,7 @@ class Upload(APIView):
             if 'youtube' in platform_list:
                 self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
             if 'amarshan' in platform_list:
-                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location) 
+                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target) 
                 
         elif media_type == "IMAGE":
             if 'instagram' in platform_list:
@@ -320,7 +318,7 @@ class Upload(APIView):
                     category = request.data['category']
                 except:
                     return JsonResponse({"Required fields":"category"})
-                self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location) 
+                self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target) 
         
         if self.status:
             return JsonResponse({"status_code":'success','status':'donation content uploaded successfully'})
@@ -424,7 +422,7 @@ class Social_Media:
         os.system(run)
         return True
     
-    def Upload_video_to_amarshan(self, video_url,title,description,category,location):
+    def Upload_video_to_amarshan(self, video_url,title,description,category,location,target):
         try:
             Donations.objects.create(
                 media_url = video_url,
@@ -432,7 +430,8 @@ class Social_Media:
                 title = title, 
                 description = description,
                 category = category,
-                location=location
+                location=location,
+                target = target
             ).save()
             return True
         except:
@@ -487,7 +486,7 @@ class Social_Media:
             print('Error creating post:', response.json()['error']['message'])
             return False
         
-    def Upload_image_to_amarshan(self,image_url, title, description, category,location):
+    def Upload_image_to_amarshan(self,image_url, title, description, category,location,target):
         try:
             Donations.objects.create(
                 media_url = image_url,
@@ -495,7 +494,8 @@ class Social_Media:
                 title = title, 
                 description = description,
                 category = category,
-                location = location
+                location = location,
+                target = target
             ).save()
             return True
         except Exception as e:

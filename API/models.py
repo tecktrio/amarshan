@@ -60,7 +60,7 @@ class Donations(models.Model):
     location        = models.CharField(max_length=100,default='')
     donation_type   = models.CharField(max_length=100,default="normal")
     category        = models.CharField(max_length=200,default='')
-    status          = models.CharField(max_length=200,default='pending',choices=(('pending','pending'),('approved','approved'),('not_approved','not_approved')))
+    status          = models.CharField(max_length=200,default='pending',choices=(('pending','pending'),('rejected','rejected'),('running','running'),('completed','completed')))
 
 class Donation_categories(models.Model):    
     name        = models.CharField(max_length=100)
