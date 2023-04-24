@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-urroi2ak8^c@0pe=6@uh$&xwemkt&h&zl)qti5&yl=(54q*3_8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'API'
+    'API',
+    'django_user_agents'
 ]
 
 MIDDLEWARE = [
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'project_amarsha.middleware.Authenticate_User_Middleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 
