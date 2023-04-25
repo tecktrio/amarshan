@@ -7,6 +7,7 @@ from API.models import Products
 from API.models import Categories
 from API.models import Donation_categories
 from API.models import Notification
+from API.models import Orders
 
 class DonationContent_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -44,3 +45,8 @@ class User_Address_Serializer(serializers.ModelSerializer):
     class Meta:
         model  = Users
         fields = 'display_name, building_name, street_name, pincode, city, state, country'
+        
+class Order_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Orders
+        fields = '__all__'

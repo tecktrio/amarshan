@@ -31,6 +31,8 @@ from API.serializers import Category_Serializer
 from API.serializers import Donation_category_serializer
 from API.serializers import Notification_serializer
 from API.serializers import User_Address_Serializer
+from API.models import Orders
+from API.serializers import Order_Serializer
 
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
@@ -673,3 +675,46 @@ class Handle_Address(APIView):
             return JsonResponse({'address':user_address_serialized.data,'status_code':'success'})
         else:
             return JsonResponse({'status':'email id does not exist','status_code':'failed'})
+        
+class Handle_myorders(APIView):
+    def get(self,request,email_id):
+        if Users.objects.filter(email = email_id).exists():
+            orders = Orders.objects.filter(email_id=email_id)
+            serialized_orders = Order_Serializer(orders,many= True)
+            return JsonResponse({'status_code':'success','orders':serialized_orders.data})
+        else:
+            return JsonResponse({'status_code':'failed','error':' Invalide email id'})
+    def post(self,request,email_id):
+        if Users.objects.filter(email = email_id).exists():
+            try:   
+                product_name = request.data['product_name']
+                product_description = request.data['product_description']
+                product_price = request.data['product_price']
+                product_image_url = request.data['product_image_url']
+            except:
+                return JsonResponse({'status_code':'failed','Required fields':'product_name, product_description, product_price, product_image_url'})
+       
+            try:
+                Orders.objects.create(email_id=email_id, product_name=product_name, product_description=product_description, product_price=product_price, product_image_url=product_image_url).save()
+                return JsonResponse({'status_code':'success','orders':'order places succesfully'})
+            except Exception as e:
+                return JsonResponse({'status_code':'failed','error':str(e)})
+        else:
+            return JsonResponse({'status_code':'failed','error':' Invalide email id'})
+    def put(self,request,email_id,order_id):
+        try:
+            status = request.data['status']
+        except:
+            return JsonResponse({'status_code':'failed','Required':'status'})
+        if Orders.objects.filter(id= order_id).exists():
+            try:
+                order = Orders.objects.get(id=order_id)
+                if status not in  ['pending','ordered','cancelled','delivered','processing','shipping']:
+                    raise TypeError
+                order.order_status = status
+                order.save()
+                return JsonResponse({'status_code':'success','status':'status updated successfully'})
+            except:
+                return JsonResponse({'status_code':'failed','error':'status can only be pending, delivered, cancelled, shipping, ordered, processing '})
+        else:
+            return JsonResponse({'status_code':'failed','error':'order id does not exist'})

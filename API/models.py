@@ -31,6 +31,7 @@ class Users(models.Model):
     dob                 = models.CharField(default="",max_length=50)
     profile_url         = models.CharField(max_length=500,default="")
     login_type          = models.CharField(max_length=50,default='google')
+    phone_number        = models.IntegerField(default=0)
     joining_date        = models.DateTimeField(default=now())
     donations_done      = models.IntegerField(default=0)
     donations_received  = models.IntegerField(default=0)
@@ -40,6 +41,8 @@ class Users(models.Model):
     city                = models.CharField(max_length=50, default='')
     state               = models.CharField(max_length=50,default='')
     country             = models.CharField(max_length=50,default='')
+    landmark            = models.CharField(max_length=100,default='')
+    
     
     def __str__(self) -> str:
         return 'Users'
@@ -103,3 +106,16 @@ Models of User alerts
 class Notification(models.Model):
     title       = models.CharField(max_length=200)
     message     = models.CharField(max_length=1000)
+    
+    
+class Orders(models.Model):
+    email_id = models.CharField(max_length=500)
+    product_name = models.CharField(max_length=100)
+    product_description = models.CharField(max_length=1000)
+    product_price = models.IntegerField()
+    order_status = models.CharField(max_length=100,default='pending',choices=(('delivered','delivered'),('cancelled','cancelled'),('shipping','shipping'),('ordered','ordered'),('processing','processing')))
+    product_image_url = models.CharField(max_length=500)
+    
+
+
+    
