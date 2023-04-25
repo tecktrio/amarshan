@@ -197,14 +197,16 @@ class Email(APIView):
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request):
+        
+        # print(request.mysecret_value)
         donation_content = Donations.objects.all()
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
     def put(self,request,id):
         try:
-            current_amount = request.data['current_amount']
-            heart = request.data['heart']
+            current_amount = int(request.data['current_amount'])
+            heart = int(request.data['heart'])
         except:
             return JsonResponse({'Required fields :':'current_amount, heart'})
         
@@ -413,11 +415,15 @@ class Social_Media:
         chuck_size = 256
         downloaded_video = requests.get(video_url,stream=True)
         print('downloading',end="")
-        os.remove('live_yt.mp4')
+        try:
+            os.remove('live_yt.mp4')
+        except:
+            pass
         with open('live_yt.mp4',"wb") as f:
             for chunk in downloaded_video.iter_content(chunk_size=chuck_size):
                 f.write(chunk)
-                print('.',end="")
+                # print('.',end="")
+        print('download is done -_-')
         run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="live_yt.mp4" '
         print(run)
         os.system(run)
@@ -592,12 +598,13 @@ class Handle_categories(APIView):
         try:
             name = request.data['name']
             description = request.data['description']
+            image_url = request.data['image_url']
         except Exception as e:
-            return JsonResponse({'status_code':'failed','Required Fields' : 'name, description'})
+            return JsonResponse({'status_code':'failed','Required Fields' : 'name, description, image_url'})
         
         if Categories.objects.filter(name=name).exists():
             return JsonResponse({'status_code':'failed','status':'category already exist'})
-        new_category = Categories.objects.create(name=name,description=description)
+        new_category = Categories.objects.create(name=name,description=description,image_url=image_url)
         new_category.save()
         
         return JsonResponse({'status_code':'success','status':'category created succesfully'})

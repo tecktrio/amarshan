@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-urroi2ak8^c@0pe=6@uh$&xwemkt&h&zl)qti5&yl=(54q*3_8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'API',
-    'django_user_agents'
 ]
 
 MIDDLEWARE = [
@@ -62,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'project_amarsha.middleware.Authenticate_User_Middleware',
-    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 
@@ -95,7 +93,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'amarshan',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': '1234',
     }
 }
 
@@ -145,6 +143,7 @@ ACCESS_TOKEN_FACEBOOK_PAGE = 'EAAH6QLlBi9gBAL1QofLYBVvm6mPQa3gB89M8CdAXvT70f2YZC
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  107774638943571 
 
+ACCESS_TOKEN_FOR_AMARSHAN_APP = 'gAAAAABkRoQXYZx3IxiuOygqu7POQCQ37-kD8t-DAhCWfboGLPb19O_5nFIrBC_mvIU2J73g_QSShl2LQdH1Mr29X5v3EFejhw=='
 # Settings for otp and other mail services
 # you can only change the EMAIL_HOST_USER and  EMAIL_HOST_PASSWORD, you will get it from your gmail my account. search for apps and get the app email and password
 

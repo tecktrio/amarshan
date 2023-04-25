@@ -63,8 +63,9 @@ class Donations(models.Model):
     status          = models.CharField(max_length=200,default='pending',choices=(('pending','pending'),('rejected','rejected'),('running','running'),('completed','completed')))
 
 class Donation_categories(models.Model):    
-    name        = models.CharField(max_length=100)
-    description = models.CharField(max_length=500)
+    name        = models.CharField(max_length=100,default='')
+    description = models.CharField(max_length=500,default='')
+    image_url = models.CharField(max_length=500,default='')
     
 class Featured(models.Model):
     media_url            = models.CharField(max_length=500)
