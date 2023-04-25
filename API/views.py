@@ -85,7 +85,7 @@ class Login(APIView):
                 if user.password == password:
                     serialized_user_data = User_Serializer(user)
                     # storing the login details 
-                    device = request.user_agent.browser
+                    device = request.device
                     
                     Login_details.objects.create(email = email,device =device).save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
@@ -303,9 +303,17 @@ class Upload(APIView):
         
         if media_type == "VIDEO":
             if 'instagram' in platform_list:
-                self.status = social_media.Upload_video_to_instagram(media_url,title)
+                try:
+                    self.status = social_media.Upload_video_to_instagram(media_url,title)
+                except:
+                    if not self.status:
+                        return Response({'status':'failed','error':'video could not upload to instagram'})
             if 'facebook' in platform_list:
-                self.status = social_media.Upload_video_to_facebook(media_url,title,description)
+                try:
+                    self.status = social_media.Upload_video_to_facebook(media_url,title,description)
+                except:
+                    if not self.status :
+                        pass
             if 'youtube' in platform_list:
                 self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
             if 'amarshan' in platform_list:
@@ -596,6 +604,7 @@ class Handle_categories(APIView):
         return JsonResponse({'categories':Serialized_categories.data})
     def post(self,request):
         try:
+            
             name = request.data['name']
             description = request.data['description']
             image_url = request.data['image_url']

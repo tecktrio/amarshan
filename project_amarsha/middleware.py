@@ -15,6 +15,8 @@ class Authenticate_User_Middleware(object):
 
     def __call__(self, request):
             # print(request.GET.get('access_token'))
+            device=request.META['REMOTE_ADDR']
+            request.device = device
             response = self.get_response(request)
             access_token = request.GET.get('access_token')
             if access_token == ACCESS_TOKEN_FOR_AMARSHAN_APP:
