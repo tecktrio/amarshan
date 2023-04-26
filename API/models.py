@@ -117,6 +117,7 @@ class Orders(models.Model):
     order_status = models.CharField(max_length=100,default='pending',choices=(('delivered','delivered'),('cancelled','cancelled'),('shipping','shipping'),('ordered','ordered'),('processing','processing')))
     product_image_url = models.CharField(max_length=500)
     item_count = models.IntegerField()
+    ordered_on = models.CharField(max_length=300,default='')
     
 
 

@@ -315,24 +315,36 @@ class Upload(APIView):
                     self.status = social_media.Upload_video_to_facebook(media_url,title,description)
                 except:
                     if not self.status :
-                        return Response({'status':'failed','error':'video could not upload to youtube or limit exceed'})
+                        return Response({'status':'failed','error':'video could not upload to facebook or limit exceed'})
             if 'youtube' in platform_list:
-                self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
+                try:
+                    self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
+                except:
+                    if not self.status :
+                        return Response({'status':'failed','error':'video could not upload to youtube or limit exceed'})
             if 'amarshan' in platform_list:
                 self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target) 
                 
         elif media_type == "IMAGE":
             if 'instagram' in platform_list:
-                self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
-            if 'facebook' in platform_list:
-                self.status = social_media.Upload_image_to_facebook(media_url,title )
-            if 'amarshan' in platform_list:
-                try:                
-                    category = request.data['category']
+                try:
+                    self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
                 except:
-                    return JsonResponse({"Required fields":"category"})
-                self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target) 
-        
+                    if not self.status:
+                        return Response({'status':'failed','error':'image could not upload to instagram'})
+            if 'facebook' in platform_list:
+                try:
+                    self.status = social_media.Upload_image_to_facebook(media_url,title )
+                except:
+                    if not self.status:
+                        return Response({'status':'failed','error':'image could not upload to facebook'})
+            if 'amarshan' in platform_list: 
+                try:
+                    self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target) 
+                except:
+                    if not self.status:
+                        return Response({'status':'failed','error':'image could not upload to amarshan'})
+        # return true if video uploaded to all platforms
         if self.status:
             return JsonResponse({"status_code":'success','status':'donation content uploaded successfully'})
         else:
@@ -710,11 +722,12 @@ class Handle_myorders(APIView):
                 product_price = request.data['product_price']
                 product_image_url = request.data['product_image_url']
                 item_count = request.data['item_count']
+                ordered_on = request.data['ordered_on']
             except:
-                return JsonResponse({'status_code':'failed','Required fields':'product_name, product_description, product_price, product_image_url'})
+                return JsonResponse({'status_code':'failed','Required fields':'product_name, product_description, product_price, product_image_url, item_count, ordered_on'})
        
             try:
-                Orders.objects.create(email_id=email_id, product_name=product_name, product_description=product_description, product_price=product_price, product_image_url=product_image_url,item_count = item_count).save()
+                Orders.objects.create(email_id=email_id, product_name=product_name, product_description=product_description, product_price=product_price, product_image_url=product_image_url,item_count = item_count,ordered_on=ordered_on).save()
                 return JsonResponse({'status_code':'success','orders':'order places succesfully'})
             except Exception as e:
                 return JsonResponse({'status_code':'failed','error':str(e)})
