@@ -675,6 +675,23 @@ class Handle_Address(APIView):
             return JsonResponse({'address':user_address_serialized.data,'status_code':'success'})
         else:
             return JsonResponse({'status':'email id does not exist','status_code':'failed'})
+    def put(self,request,email_id):
+            if Users.objects.filter(email = email_id).exists():
+                user = Users.objects.get(email = email_id)
+                try:
+                    user.display_name = request.data['display_name']
+                    user.building_name = request.data['building_name']
+                    user.street_name  = request.data['street_name']
+                    user.pincode   = request.data['pincode']
+                    user.city = request.data['city']
+                    user.state = request.data['state']
+                    user.country = request.data['country']
+                    user.landmark = request.data['landmark']
+                    user.save()
+                    return JsonResponse({'status':'address updated succesfully','status_code':'success'})
+                except:
+                    return JsonResponse({'Required':'display_name, building_name, street_name, landmark, pincode, city, state, country','status_code':'failed'})
+                    
         
 class Handle_myorders(APIView):
     def get(self,request,email_id):
