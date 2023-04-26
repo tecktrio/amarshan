@@ -315,7 +315,7 @@ class Upload(APIView):
                     self.status = social_media.Upload_video_to_facebook(media_url,title,description)
                 except:
                     if not self.status :
-                        pass
+                        return Response({'status':'failed','error':'video could not upload to youtube or limit exceed'})
             if 'youtube' in platform_list:
                 self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
             if 'amarshan' in platform_list:

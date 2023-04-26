@@ -85,10 +85,10 @@ class Featured(models.Model):
 Models for storing data of shopping
 '''
 class Products(models.Model):
-    name            = models.CharField(max_length=100,default='')
+    name            = models.CharField(max_length=500,default='')
     category        = models.CharField(max_length=100,default='')
     price           = models.IntegerField(default=0)
-    description     = models.CharField(max_length=800,default='')
+    description     = models.CharField(max_length=1000,default='')
     image_1_url     = models.CharField(max_length=300)
     image_2_url     = models.CharField(max_length=300)
     image_3_url     = models.CharField(max_length=300)
