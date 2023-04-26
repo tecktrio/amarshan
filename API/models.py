@@ -32,7 +32,7 @@ class Users(models.Model):
     profile_url         = models.CharField(max_length=500,default="")
     login_type          = models.CharField(max_length=50,default='google')
     phone_number        = models.IntegerField(default=0)
-    joining_date        = models.DateTimeField(default='')
+    joining_date        = models.CharField(default='')
     donations_done      = models.IntegerField(default=0)
     donations_received  = models.IntegerField(default=0)
     building_name       = models.CharField(max_length=50, default='')
@@ -49,7 +49,7 @@ class Users(models.Model):
     
 class Login_details(models.Model):
     email            = models.CharField(max_length=100)
-    login_time       = models.DateTimeField(default='')
+    login_time       = models.CharField(default='')
     device           = models.CharField(max_length=800)
     
 class Donations(models.Model):
