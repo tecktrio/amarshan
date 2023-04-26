@@ -80,6 +80,7 @@ TEMPLATES = [
             ],
         },
     },
+    
 ]
 
 WSGI_APPLICATION = 'project_amarsha.wsgi.application'
