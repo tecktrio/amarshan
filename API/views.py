@@ -615,7 +615,7 @@ class Handle_categories(APIView):
         
         if Categories.objects.filter(name=name).exists():
             return JsonResponse({'status_code':'failed','status':'category already exist'})
-        new_category = Categories.objects.create(name=name,description=description,image_url=image_url)
+        new_category = Categories.objects.create(name=name,description=description)
         new_category.save()
         
         return JsonResponse({'status_code':'success','status':'category created succesfully'})

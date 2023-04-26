@@ -32,7 +32,7 @@ class Users(models.Model):
     profile_url         = models.CharField(max_length=500,default="")
     login_type          = models.CharField(max_length=50,default='google')
     phone_number        = models.IntegerField(default=0)
-    joining_date        = models.DateTimeField(default=now())
+    joining_date        = models.DateTimeField(default='')
     donations_done      = models.IntegerField(default=0)
     donations_received  = models.IntegerField(default=0)
     building_name       = models.CharField(max_length=50, default='')
@@ -49,7 +49,7 @@ class Users(models.Model):
     
 class Login_details(models.Model):
     email            = models.CharField(max_length=100)
-    login_time       = models.DateTimeField(default=now())
+    login_time       = models.DateTimeField(default='')
     device           = models.CharField(max_length=800)
     
 class Donations(models.Model):
@@ -68,7 +68,7 @@ class Donations(models.Model):
 class Donation_categories(models.Model):    
     name        = models.CharField(max_length=100,default='')
     description = models.CharField(max_length=500,default='')
-    image_url = models.CharField(max_length=500,default='')
+    image_url   = models.CharField(max_length=500,default='')
     
 class Featured(models.Model):
     media_url            = models.CharField(max_length=500)
@@ -98,6 +98,7 @@ class Products(models.Model):
 class Categories(models.Model):
     name         = models.CharField(max_length=200)
     description  = models.CharField(max_length=500,default='')
+    image_url  = models.CharField(max_length=500,default='')
     
 '''
 Models of User alerts
