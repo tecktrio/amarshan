@@ -687,10 +687,11 @@ class Handle_Address(APIView):
                     user.state = request.data['state']
                     user.country = request.data['country']
                     user.landmark = request.data['landmark']
+                    user.phone_number = request.data['phone_number']
                     user.save()
                     return JsonResponse({'status':'address updated succesfully','status_code':'success'})
                 except:
-                    return JsonResponse({'Required':'display_name, building_name, street_name, landmark, pincode, city, state, country','status_code':'failed'})
+                    return JsonResponse({'Required':'display_name, building_name, street_name, landmark, pincode, city, state, country, phone_number','status_code':'failed'})
                     
         
 class Handle_myorders(APIView):

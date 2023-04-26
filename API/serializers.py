@@ -44,7 +44,7 @@ class Notification_serializer(serializers.ModelSerializer):
 class User_Address_Serializer(serializers.ModelSerializer):
     class Meta:
         model  = Users
-        fields = ('display_name', 'building_name', 'street_name', 'pincode', 'city', 'state', 'country')
+        fields = ('display_name', 'building_name', 'street_name', 'pincode', 'city', 'state', 'country','landmark','phone_number')
         
 class Order_Serializer(serializers.ModelSerializer):
     class Meta:
