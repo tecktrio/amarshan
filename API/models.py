@@ -31,7 +31,7 @@ class Users(models.Model):
     dob                 = models.CharField(default="",max_length=50)
     profile_url         = models.CharField(max_length=500,default="")
     login_type          = models.CharField(max_length=50,default='google')
-    phone_number        = models.IntegerField(default=0)
+    phone_number        = models.CharField(max_length=200,default='')
     joining_date        = models.CharField(default='',max_length=50)
     donations_done      = models.IntegerField(default=0)
     donations_received  = models.IntegerField(default=0)
