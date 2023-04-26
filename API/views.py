@@ -713,7 +713,7 @@ class Handle_myorders(APIView):
             user = Users.objects.get(email = email_id)
             user_address_serialized = User_Address_Serializer(user)
             serialized_orders = Order_Serializer(orders,many= True)
-            return JsonResponse({'status_code':'success','order_details':serialized_orders.data,'address_details':user_address_serialized})
+            return JsonResponse({'status_code':'success','order_details':serialized_orders.data,'address_details':user_address_serialized.data})
         else:
             return JsonResponse({'status_code':'failed','error':' Invalide email id'})
     def post(self,request,email_id):
