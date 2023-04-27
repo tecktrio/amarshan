@@ -33,6 +33,8 @@ from API.serializers import Notification_serializer
 from API.serializers import User_Address_Serializer
 from API.models import Orders
 from API.serializers import Order_Serializer
+from API.models import Donation_History
+from API.serializers import Donation_History_Serializer
 
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
@@ -201,7 +203,7 @@ class Donation_content(APIView):
     def get(self,request):
         
         # print(request.mysecret_value)
-        donation_content = Donations.objects.all()
+        donation_content = reversed(Donations.objects.all())
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
@@ -210,13 +212,40 @@ class Donation_content(APIView):
             current_amount = int(request.data['current_amount'])
             heart = int(request.data['heart'])
         except:
-            return JsonResponse({'Required fields :':'current_amount, heart'})
+            return JsonResponse({'Required fields :':'current_amount, heart ,(options : status ["pending","rejected","running","completed"])'})
         
         if Donations.objects.filter(id=id).exists():
             try:
                 current_donation = Donations.objects.get(id=id)
                 current_donation.current_amount = current_amount
                 current_donation.heart = heart
+                
+                try:
+                    status = request.data['status']
+                    if status in ["pending","rejected","running","completed"]:
+                        current_donation.status = status
+                        if status == 'completed':
+                            try:
+                                completed_on = request.data['completed_on']
+                                new_donation_history = Donation_History.objects.create(media_type = current_donation.media_type,
+                                                                                    target = current_donation.target,
+                                                                                    heart = current_donation.heart,
+                                                                                    title = current_donation.title,
+                                                                                    description = current_donation.description,
+                                                                                    location = current_donation.location,
+                                                                                    donation_type = current_donation.donation_type,
+                                                                                    category = current_donation.category,
+                                                                                    upload_on = current_donation.upload_on,
+                                                                                    completed_on  = completed_on,
+                                                                                    )
+                                new_donation_history.save()
+            
+                            except Exception as e:
+                                return JsonResponse({'status_code':'failed','Required':'completed_on','error':str(e)})
+                    else:
+                        return JsonResponse({'status_code':'failed','Required':'status can be ["pending","rejected","running","completed"]'})
+                except:
+                    pass
                 current_donation.save()
                 return JsonResponse(({'status_code':'success','status':'donation upated'}))
             except:
@@ -648,7 +677,19 @@ class Handle_Donation_categories(APIView):
             return JsonResponse({'status_code':'failed', 'error':'category already exist'})
         Donation_categories.objects.create(name=name, description= description).save()
         return JsonResponse({'status_code':'success','status':'category created successfully'})
-
+    def put(self,request,id):
+        if Donation_categories.objects.filter(id=id).exists():
+            try:
+                image_url = request.data['image_url']
+                catogory =  Donation_categories.objects.get(id=id)
+                catogory.image_url = image_url
+                catogory.save()
+                return JsonResponse({'status_code':'success','status':'catagory updated successfully'})
+            except:
+                return JsonResponse({"status_code":'failed','Requiried':'image_url'})
+        else:
+            return JsonResponse({"status_code":'failed','error':'category id do not exist'})
+        
 class Handle_Notifications(APIView):
     def get(self, request):
         notifications = Notification.objects.all()
@@ -752,3 +793,9 @@ class Handle_myorders(APIView):
                 return JsonResponse({'status_code':'failed','error':'status can only be pending, delivered, cancelled, shipping, ordered, processing '})
         else:
             return JsonResponse({'status_code':'failed','error':'order id does not exist'})
+        
+class Handle_Donation_History(APIView):
+    def get(self,request):
+        donations_done = Donation_History.objects.all()
+        donations_done_serialized = Donation_History_Serializer(donations_done,many=True)
+        return JsonResponse({'status_code':'success','history':donations_done_serialized.data})

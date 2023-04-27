@@ -8,6 +8,7 @@ from API.models import Categories
 from API.models import Donation_categories
 from API.models import Notification
 from API.models import Orders
+from API.models import Donation_History
 
 class DonationContent_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -49,4 +50,9 @@ class User_Address_Serializer(serializers.ModelSerializer):
 class Order_Serializer(serializers.ModelSerializer):
     class Meta:
         model  = Orders
+        fields = '__all__'
+        
+class Donation_History_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation_History
         fields = '__all__'

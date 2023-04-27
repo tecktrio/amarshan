@@ -29,7 +29,8 @@ urlpatterns = [
     path('donations/<int:id>', views.Donation_content.as_view()),
     path('donations/upload', views.Upload.as_view()),
     path('donations/categories',views.Handle_Donation_categories.as_view()),
-    
+    path('donations/history',views.Handle_Donation_History.as_view()),
+
     # featured entpoints to control the featured data in server
     path('featured', views.Featured_content.as_view()),
     path('featured/<int:id>', views.Featured_content.as_view()),
@@ -50,5 +51,6 @@ urlpatterns = [
     path('shopping/categories',views.Handle_categories.as_view()),
     path('notifications',views.Handle_Notifications.as_view()),
     path('notifications/<int:id>',views.Handle_Notifications.as_view()),
+    
     
 ]

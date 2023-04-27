@@ -63,6 +63,7 @@ class Donations(models.Model):
     location        = models.CharField(max_length=100,default='')
     donation_type   = models.CharField(max_length=100,default="normal")
     category        = models.CharField(max_length=200,default='')
+    upload_on      = models.CharField(max_length=200,default='')
     status          = models.CharField(max_length=200,default='pending',choices=(('pending','pending'),('rejected','rejected'),('running','running'),('completed','completed')))
 
 class Donation_categories(models.Model):    
@@ -120,5 +121,14 @@ class Orders(models.Model):
     ordered_on = models.CharField(max_length=300,default='')
     
 
-
-    
+class Donation_History(models.Model):
+    media_type      = models.CharField(max_length=20)
+    target          = models.IntegerField(default=0)
+    heart           = models.IntegerField(default=0)
+    title           = models.CharField(max_length=100)
+    description     = models.CharField(max_length=1000,default='')
+    location        = models.CharField(max_length=100,default='')
+    donation_type   = models.CharField(max_length=100,default="")
+    category        = models.CharField(max_length=200,default='')
+    upload_on       = models.CharField(max_length=100,default='')
+    completed_on    = models.CharField(max_length=100,default='')
