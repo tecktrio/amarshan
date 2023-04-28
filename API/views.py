@@ -391,13 +391,13 @@ class Social_Media:
     
     def uploading_thread_method(self,video_container_id,access_token,page_id):
         count = 0
-        while requests.get("https://graph.facebook.com/v10.0/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
+        while requests.get("https://graph.facebook.com/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
             print(count, 'seconds',end='\r')
             count += 1
             time.sleep(1)
 
         print('Making the video public...')
-        post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,video_container_id,access_token)
+        post_url = "https://graph.facebook.com/{}/media_publish?creation_id={}&access_token={}".format(page_id,video_container_id,access_token)
         response = requests.post(post_url)
         print('post id : ',response.json().get('id'))
         return True
@@ -411,13 +411,20 @@ class Social_Media:
         '''Required parameter :
         => video_url, title
         '''
+        print(video_url)
         if video_url is None:
             return JsonResponse({"Input Error":"video url cannot be empty and it should be valid"})
         page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
         access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        get_url = "https://graph.facebook.com/v10.0/{}/media?video_url={}&caption={}&media_type={}&access_token={}".format(page_id,video_url,title,"VIDEO",access_token)
+        get_url = f"https://graph.facebook.com/{page_id}/media"
+        data = {
+            "video_url":video_url,
+            "caption":title,
+            "access_token":access_token,
+            "media_type":"VIDEO",
+        }
         print('Requesting for the video container id for instagram ...')
-        response = requests.post(get_url)
+        response = requests.post(get_url,json=data)
         print(response.json())
         video_container_id = int(response.json().get('id'))
         if video_container_id is None:
