@@ -94,7 +94,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'amarshan',
         'USER': 'root',
-        'PASSWORD': '1234',
+        'PASSWORD': 'password',
     }
 }
 
@@ -140,10 +140,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-ACCESS_TOKEN_FACEBOOK_PAGE = 'EAALB1npj3f4BAGuQlyqgyBlNzZBHrOugvLhQW8nj6HpC8iHZACJJIjqxSUsWFsTeoRZBssLnU3i5cN9MPLucsSZCigIMHbnuvpBmexmQLVZByBQ3wby0SDRzVixEK0bRFGO8jlfzx4TUjS38J6zRLhZASlnbpryuFQoZCl2Gd0AAO9ZBby3IGsV4YQacJKkIZAkzZCsWqPvW2M5KPeZALiZBL6gu4WERrjXYchBOg3Q6CjJcAGGJfhWMC5apT5LTeJDbGdIZD'
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  101200166274775 
-
+ACCESS_TOKEN_FACEBOOK_PAGE = ''
 ACCESS_TOKEN_FOR_AMARSHAN_APP = 'gAAAAABkRoQXYZx3IxiuOygqu7POQCQ37-kD8t-DAhCWfboGLPb19O_5nFIrBC_mvIU2J73g_QSShl2LQdH1Mr29X5v3EFejhw=='
 # Settings for otp and other mail services
 # you can only change the EMAIL_HOST_USER and  EMAIL_HOST_PASSWORD, you will get it from your gmail my account. search for apps and get the app email and password

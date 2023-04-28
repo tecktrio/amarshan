@@ -451,13 +451,14 @@ class Social_Media:
         description : ''',description,'''
         ''')
         url = f"https://graph.facebook.com/{page_id}/videos"
-        print('Trying to upload the post to facebook page...')
+        print('Trying to upload the post to facebook page...requesting to url',url)
         data = {
             "file_url":video_url,
             "title":title,
             "description":description,
-            "access_token":access_token
+            "access_token":access_token,
         }
+        
         response = requests.post(url,json=data)
         print(response.json())
         print('post id : ',response.json().get('id'))
