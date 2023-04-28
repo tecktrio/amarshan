@@ -94,7 +94,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'amarshan',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': '1234',
     }
 }
 
@@ -140,7 +140,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-ACCESS_TOKEN_FACEBOOK_PAGE = 'EAALB1npj3f4BAGrftYDk4ACZB8CsRDzAmebgUnPZCd8UZCLJ87kTLZBZC7ZAj4sdXmwKtStsbqcHCp776QlQIvHmm7nbsxdxmZCw1hrqEHw2tCgXotbDYk7XfCvdBbmwl7qWP8jU6mfBbWzEbAKwi1tfCPsX3oIzzuvcpF8wrKPzAiCBLV2ryZCI8PM4Sh3iZB46ZAqeVuTZAk2UFxyPhgjiwiB'
+ACCESS_TOKEN_FACEBOOK_PAGE = 'EAALB1npj3f4BAEBTZCQUQCyB9hZB3yF0XiD7RpqGUYa9RvR2Q7n28AZC7EWMvVrAUuXDr8v98M9RMYOlxZBjN3ebfpMKYr7dSDS4N8ZCxedfr9SA3BcDW0HyWiZBHop0Ht9aOCvTvoZC7feV04okXotwmLjjhyEsu7fnZCVNwdeTs0DFIuV7Hl1cNjiUNzFbDBIZD'
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  101200166274775 
 
