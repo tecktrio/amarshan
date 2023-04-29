@@ -321,8 +321,8 @@ class Upload(APIView):
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
             
             platform_list = platform.split(',')
-        except:
-            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description, target'})
+        except Exception as e:
+            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
         
         social_media = Social_Media()
@@ -331,21 +331,21 @@ class Upload(APIView):
             if 'instagram' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_instagram(media_url,title)
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'video could not upload to instagram'})
+                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to instagram'})
             if 'facebook' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_facebook(media_url,title,description)
-                except:
+                except Exception as e:
                     if not self.status :
-                        return Response({'status':'failed','error':'video could not upload to facebook or limit exceed'})
+                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to facebook or limit exceed'})
             if 'youtube' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
-                except:
+                except Exception as e:
                     if not self.status :
-                        return Response({'status':'failed','error':'video could not upload to youtube or limit exceed'})
+                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to youtube or limit exceed'})
             if 'amarshan' in platform_list:
                 self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target) 
                 
@@ -353,21 +353,21 @@ class Upload(APIView):
             if 'instagram' in platform_list:
                 try:
                     self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'image could not upload to instagram'})
+                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to instagram'})
             if 'facebook' in platform_list:
                 try:
                     self.status = social_media.Upload_image_to_facebook(media_url,title )
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'image could not upload to facebook'})
+                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to facebook'})
             if 'amarshan' in platform_list: 
                 try:
                     self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target) 
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'image could not upload to amarshan'})
+                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to amarshan'})
         # return true if video uploaded to all platforms
         if self.status:
             return JsonResponse({"status_code":'success','status':'donation content uploaded successfully'})
