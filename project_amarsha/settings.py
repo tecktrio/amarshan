@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,8 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-urroi2ak8^c@0pe=6@uh$&xwemkt&h&zl)qti5&yl=(54q*3_8'
-
+SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -89,14 +89,17 @@ WSGI_APPLICATION = 'project_amarsha.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'amarshan',
-        'USER': 'root',
-        'PASSWORD': 'password',
-    }
-}
+DATABASES = DATABASES={
+    'default':
+        {
+            'ENGINE':'django.db.backends.mysql',
+            'NAME': 'amarshan',
+            'USER': 'root',
+            'PASSWORD': '1234',
+         
+         }
+        }
+
 
 
 # Password validation
@@ -142,14 +145,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  101200166274775 
-ACCESS_TOKEN_FACEBOOK_PAGE = ''
-ACCESS_TOKEN_FOR_AMARSHAN_APP = 'gAAAAABkRoQXYZx3IxiuOygqu7POQCQ37-kD8t-DAhCWfboGLPb19O_5nFIrBC_mvIU2J73g_QSShl2LQdH1Mr29X5v3EFejhw=='
+ACCESS_TOKEN_FACEBOOK_PAGE = config('ACCESS_TOKEN_FACEBOOK_PAGE')
+
+ACCESS_TOKEN_FOR_AMARSHAN_APP = config('ACCESS_TOKEN_FOR_AMARSHAN_APP')
 # Settings for otp and other mail services
 # you can only change the EMAIL_HOST_USER and  EMAIL_HOST_PASSWORD, you will get it from your gmail my account. search for apps and get the app email and password
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'coderboy.connect@gmail.com'#sender's email-id
-EMAIL_HOST_PASSWORD = 'rnoxkwdhhqfjfvps'#password associated with above email-id
+# setting up django email backend
+EMAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')#sender's email-id
+
+# aws credentials
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_SES_REGION_NAME = config('AWS_SES_REGION_NAME')
+AWS_SES_REGION_ENDPOINT = config('AWS_SES_REGION_ENDPOINT')

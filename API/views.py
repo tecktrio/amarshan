@@ -3,6 +3,7 @@ This logic part is developed by amal benny. For any doughts you can contact bsho
 '''
 
 # Neccessary Modules for this app
+from django.core.mail import EmailMessage, get_connection
 
 import os
 import smtplib
@@ -173,22 +174,16 @@ class Email(APIView):
             text_content = strip_tags(html_content)
             
             try:
-                email = EmailMultiAlternatives(
+               
+                send_mail(
                     subject,
                     text_content,
                     EMAIL_HOST_USER,
-                    [recipient_email]
+                    [recipient_email,]
                 )
-            except:
-                return JsonResponse({'error':'email error, mail not send','status_code':'failed'})
-            
-            try:
-                email.attach_alternative(html_content,'text/html')
-            except Exception:
-                return JsonResponse({'email attachment failed'})
-            
-            email.send()
-            
+            except Exception as e:
+                return JsonResponse({'error':'email error, mail not send','status_code':'failed','reason':str(e)})
+     
         except Exception as e:
             print(e)
             return JsonResponse({'error':'unkown error, mail not send','status_code':'failed'})
