@@ -96,7 +96,6 @@ DATABASES = DATABASES={
             'NAME': 'amarshan',
             'USER': 'root',
             'PASSWORD': 'password',
-         
          }
         }
 
