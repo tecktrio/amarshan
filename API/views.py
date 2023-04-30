@@ -3,6 +3,7 @@ This logic part is developed by amal benny. For any doughts you can contact bsho
 '''
 
 # Neccessary Modules for this app
+import datetime
 from django.core.mail import EmailMessage, get_connection
 
 import os
@@ -93,7 +94,7 @@ class Login(APIView):
                     # storing the login details 
                     device = request.device
                     
-                    Login_details.objects.create(email = email,device =device).save()
+                    Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
