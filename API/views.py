@@ -308,6 +308,8 @@ class Upload(APIView):
         => IMAGE  : platform, media_type, image, caption
         '''
         try:
+            profile_url = request.data['profile_url']
+            email_id = request.data['email_id']
             platform = request.data['platform']
             media_type = str(request.data['media_type']).upper()
             category = request.data['category']
@@ -322,7 +324,7 @@ class Upload(APIView):
             
             platform_list = platform.split(',')
         except Exception as e:
-            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
+            return JsonResponse({'Required fields':'email_id, profile_url,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
         
         social_media = Social_Media()
@@ -347,7 +349,7 @@ class Upload(APIView):
                     if not self.status :
                         return Response({'reason':str(e),'status':'failed','error':'video could not upload to youtube or limit exceed'})
             if 'amarshan' in platform_list:
-                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target) 
+                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target,profile_url, email_id) 
                 
         elif media_type == "IMAGE":
             if 'instagram' in platform_list:
@@ -364,7 +366,7 @@ class Upload(APIView):
                         return Response({'reason':str(e),'status':'failed','error':'image could not upload to facebook'})
             if 'amarshan' in platform_list: 
                 try:
-                    self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target) 
+                    self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target,profile_url=profile_url,email_id=email_id) 
                 except Exception as e:
                     if not self.status:
                         return Response({'reason':str(e),'status':'failed','error':'image could not upload to amarshan'})
@@ -483,7 +485,7 @@ class Social_Media:
         os.system(run)
         return True
     
-    def Upload_video_to_amarshan(self, video_url,title,description,category,location,target):
+    def Upload_video_to_amarshan(self, video_url,title,description,category,location,target,profile_url,email_id):
         try:
             Donations.objects.create(
                 media_url = video_url,
@@ -492,7 +494,9 @@ class Social_Media:
                 description = description,
                 category = category,
                 location=location,
-                target = target
+                target = target,
+                profile_url = profile_url,
+                email_id = email_id
             ).save()
             return True
         except:
@@ -547,7 +551,7 @@ class Social_Media:
             print('Error creating post:', response.json()['error']['message'])
             return False
         
-    def Upload_image_to_amarshan(self,image_url, title, description, category,location,target):
+    def Upload_image_to_amarshan(self,image_url, title, description, category,location,target,profile_url,email_id):
         try:
             Donations.objects.create(
                 media_url = image_url,
@@ -556,7 +560,9 @@ class Social_Media:
                 description = description,
                 category = category,
                 location = location,
-                target = target
+                target = target,
+                profile_url = profile_url,
+                email_id = email_id
             ).save()
             return True
         except Exception as e:
