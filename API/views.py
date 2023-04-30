@@ -36,6 +36,7 @@ from API.models import Orders
 from API.serializers import Order_Serializer
 from API.models import Donation_History
 from API.serializers import Donation_History_Serializer
+from API.serializers import Login_Detail_Serializer
 
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
@@ -808,3 +809,9 @@ class Handle_Donation_History(APIView):
         donations_done = Donation_History.objects.all()
         donations_done_serialized = Donation_History_Serializer(donations_done,many=True)
         return JsonResponse({'status_code':'success','history':donations_done_serialized.data})
+    
+class TrafficInfo(APIView):
+    def get(self,request):
+        login_details = Login_details.objects.all()
+        serialized_login_details = Login_Detail_Serializer(login_details,many=True)
+        return JsonResponse({'status_code':'success','login_details':serialized_login_details.data})

@@ -55,4 +55,9 @@ class Order_Serializer(serializers.ModelSerializer):
 class Donation_History_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Donation_History
+        fields = '__all__'        
+        
+class Login_Detail_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation_History
         fields = '__all__'
