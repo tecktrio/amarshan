@@ -53,6 +53,8 @@ class Login_details(models.Model):
     device           = models.CharField(max_length=800)
     
 class Donations(models.Model):
+    email_id        = models.CharField(max_length=200,default='')
+    profile_url     = models.CharField(max_length=200,default='')
     media_url       = models.CharField(max_length=500)
     media_type      = models.CharField(max_length=20)
     target          = models.IntegerField(default=0)
@@ -122,6 +124,7 @@ class Orders(models.Model):
     
 
 class Donation_History(models.Model):
+    email_id        = models.CharField(max_length=200,default='')
     media_type      = models.CharField(max_length=20)
     target          = models.IntegerField(default=0)
     heart           = models.IntegerField(default=0)
