@@ -15,7 +15,7 @@ class Authenticate_User_Middleware(object):
 
     def __call__(self, request):
             # print(request.GET.get('access_token'))
-            device=request.META['REMOTE_ADDR']
+            device=request.META['HTTP_USER_AGENT']
             request.device = device
             response = self.get_response(request)
             access_token = request.GET.get('access_token')
