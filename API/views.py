@@ -813,6 +813,6 @@ class Handle_Donation_History(APIView):
     
 class TrafficInfo(APIView):
     def get(self,request):
-        login_details = Login_details.objects.all()
+        login_details = reversed(Login_details.objects.all())
         serialized_login_details = Login_Detail_Serializer(login_details,many=True)
         return JsonResponse({'status_code':'success','login_details':serialized_login_details.data})
