@@ -200,7 +200,13 @@ class Donation_content(APIView):
     def get(self,request,category):
         
         # print(request.mysecret_value)
-        donation_content = reversed(Donations.objects.filter(category=category))
+        if category =='all':
+            donation_content = reversed(Donations.objects.all())
+        else:
+            try:
+                donation_content = reversed(Donations.objects.filter(category=category))
+            except:
+                return JsonResponse({"status_code":"failed","error":'category not found'})
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
