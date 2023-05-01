@@ -23,6 +23,8 @@ def now():
 # Tables or Models
 
 # User model
+class Storage(models.Model):
+    media = models.FileField(upload_to='media')
 class Users(models.Model):
     display_name        = models.CharField(max_length=30)
     email               = models.CharField(max_length=30)

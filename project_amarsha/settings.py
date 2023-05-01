@@ -95,7 +95,7 @@ DATABASES = DATABASES={
             'ENGINE':'django.db.backends.mysql',
             'NAME': 'amarshan',
             'USER': 'root',
-            'PASSWORD': 'password',
+            'PASSWORD': '1234',
          }
         }
 
@@ -142,6 +142,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_FILE_STORAGE=   'API.StorageBackend.MediaStorage'
+AWS_STORAGE_BUCKET_NAME = 'amarshan'
+AWS_QUERYSTRING_AUTH = True
+
 INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
 FACEBOOK_PAGE_ID =  101200166274775 
 ACCESS_TOKEN_FACEBOOK_PAGE = config('ACCESS_TOKEN_FACEBOOK_PAGE')

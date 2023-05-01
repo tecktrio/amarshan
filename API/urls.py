@@ -21,6 +21,7 @@ from API import views
 urlpatterns = [
     # root or about
     path('', views.root.as_view()),
+    path('storage', views.Handle_Storage.as_view()),
     # Admin
     
     
