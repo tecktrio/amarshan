@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'API',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -95,7 +96,7 @@ DATABASES = DATABASES={
             'ENGINE':'django.db.backends.mysql',
             'NAME': 'amarshan',
             'USER': 'root',
-            'PASSWORD': 'password',
+            'PASSWORD': '1234',
          }
         }
 
@@ -143,11 +144,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FILE_STORAGE=   'API.StorageBackend.MediaStorage'
-AWS_STORAGE_BUCKET_NAME = 'amarshan'
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH = True
 
-INSTAGRAM_BUSINESS_ACCOUNT_ID = 17841458772178702
-FACEBOOK_PAGE_ID =  101200166274775 
+INSTAGRAM_BUSINESS_ACCOUNT_ID = config('INSTAGRAM_BUSINESS_ACCOUNT_ID')
+FACEBOOK_PAGE_ID =  config('FACEBOOK_PAGE_ID')
 ACCESS_TOKEN_FACEBOOK_PAGE = config('ACCESS_TOKEN_FACEBOOK_PAGE')
 
 ACCESS_TOKEN_FOR_AMARSHAN_APP = config('ACCESS_TOKEN_FOR_AMARSHAN_APP')

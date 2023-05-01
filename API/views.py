@@ -5,7 +5,7 @@ This logic part is developed by amal benny. For any doughts you can contact bsho
 # Neccessary Modules for this app
 import datetime
 from django.core.mail import EmailMessage, get_connection
-
+from boto3.session import Session
 import os
 import smtplib
 import time
@@ -39,6 +39,7 @@ from API.models import Donation_History
 from API.serializers import Donation_History_Serializer
 from API.serializers import Login_Detail_Serializer
 from API.models import Storage
+from project_amarsha.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
 
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
@@ -827,4 +828,6 @@ class Handle_Storage(APIView):
     def post(self,request):
         media = request.data['media']
         Storage.objects.create(media=media).save()
-        return JsonResponse({'status_code':'success'})
+        url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
+        print(url)
+        return JsonResponse({'status_code':'success','url':url})
