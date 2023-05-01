@@ -197,10 +197,10 @@ class Email(APIView):
             
 #Endpoint to Upload File
 class Donation_content(APIView):
-    def get(self,request):
+    def get(self,request,category):
         
         # print(request.mysecret_value)
-        donation_content = reversed(Donations.objects.all())
+        donation_content = reversed(Donations.objects.filter(category=category))
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
