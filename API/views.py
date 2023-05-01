@@ -3,8 +3,9 @@ This logic part is developed by amal benny. For any doughts you can contact bsho
 '''
 
 # Neccessary Modules for this app
+import datetime
 from django.core.mail import EmailMessage, get_connection
-
+from boto3.session import Session
 import os
 import smtplib
 import time
@@ -36,6 +37,9 @@ from API.models import Orders
 from API.serializers import Order_Serializer
 from API.models import Donation_History
 from API.serializers import Donation_History_Serializer
+from API.serializers import Login_Detail_Serializer
+from API.models import Storage
+from project_amarsha.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
 
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
@@ -92,7 +96,7 @@ class Login(APIView):
                     # storing the login details 
                     device = request.device
                     
-                    Login_details.objects.create(email = email,device =device).save()
+                    Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
@@ -195,10 +199,14 @@ class Email(APIView):
             
 #Endpoint to Upload File
 class Donation_content(APIView):
-    def get(self,request):
+    def get(self,request,category):
         
         # print(request.mysecret_value)
-        donation_content = reversed(Donations.objects.all())
+        print(category)
+        if category =='all':
+            donation_content = reversed(Donations.objects.all())
+        else:
+            donation_content = reversed(Donations.objects.filter(category=category))
         serialized_content = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
@@ -308,6 +316,8 @@ class Upload(APIView):
         => IMAGE  : platform, media_type, image, caption
         '''
         try:
+            profile_url = request.data['profile_url']
+            email_id = request.data['email_id']
             platform = request.data['platform']
             media_type = str(request.data['media_type']).upper()
             category = request.data['category']
@@ -321,8 +331,8 @@ class Upload(APIView):
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
             
             platform_list = platform.split(',')
-        except:
-            return JsonResponse({'Required fields':'platform, media_type, category, location, media_url, title, description, target'})
+        except Exception as e:
+            return JsonResponse({'Required fields':'email_id, profile_url,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
         
         social_media = Social_Media()
@@ -331,43 +341,43 @@ class Upload(APIView):
             if 'instagram' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_instagram(media_url,title)
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'video could not upload to instagram'})
+                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to instagram'})
             if 'facebook' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_facebook(media_url,title,description)
-                except:
+                except Exception as e:
                     if not self.status :
-                        return Response({'status':'failed','error':'video could not upload to facebook or limit exceed'})
+                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to facebook or limit exceed'})
             if 'youtube' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
-                except:
+                except Exception as e:
                     if not self.status :
-                        return Response({'status':'failed','error':'video could not upload to youtube or limit exceed'})
+                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to youtube or limit exceed'})
             if 'amarshan' in platform_list:
-                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target) 
+                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target,profile_url, email_id) 
                 
         elif media_type == "IMAGE":
             if 'instagram' in platform_list:
                 try:
                     self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'image could not upload to instagram'})
+                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to instagram'})
             if 'facebook' in platform_list:
                 try:
                     self.status = social_media.Upload_image_to_facebook(media_url,title )
-                except:
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'image could not upload to facebook'})
+                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to facebook'})
             if 'amarshan' in platform_list: 
                 try:
-                    self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target) 
-                except:
+                    self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target,profile_url=profile_url,email_id=email_id) 
+                except Exception as e:
                     if not self.status:
-                        return Response({'status':'failed','error':'image could not upload to amarshan'})
+                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to amarshan'})
         # return true if video uploaded to all platforms
         if self.status:
             return JsonResponse({"status_code":'success','status':'donation content uploaded successfully'})
@@ -483,7 +493,7 @@ class Social_Media:
         os.system(run)
         return True
     
-    def Upload_video_to_amarshan(self, video_url,title,description,category,location,target):
+    def Upload_video_to_amarshan(self, video_url,title,description,category,location,target,profile_url,email_id):
         try:
             Donations.objects.create(
                 media_url = video_url,
@@ -492,7 +502,9 @@ class Social_Media:
                 description = description,
                 category = category,
                 location=location,
-                target = target
+                target = target,
+                profile_url = profile_url,
+                email_id = email_id
             ).save()
             return True
         except:
@@ -547,7 +559,7 @@ class Social_Media:
             print('Error creating post:', response.json()['error']['message'])
             return False
         
-    def Upload_image_to_amarshan(self,image_url, title, description, category,location,target):
+    def Upload_image_to_amarshan(self,image_url, title, description, category,location,target,profile_url,email_id):
         try:
             Donations.objects.create(
                 media_url = image_url,
@@ -556,7 +568,9 @@ class Social_Media:
                 description = description,
                 category = category,
                 location = location,
-                target = target
+                target = target,
+                profile_url = profile_url,
+                email_id = email_id
             ).save()
             return True
         except Exception as e:
@@ -802,3 +816,18 @@ class Handle_Donation_History(APIView):
         donations_done = Donation_History.objects.all()
         donations_done_serialized = Donation_History_Serializer(donations_done,many=True)
         return JsonResponse({'status_code':'success','history':donations_done_serialized.data})
+    
+class TrafficInfo(APIView):
+    def get(self,request):
+        login_details = reversed(Login_details.objects.all())
+        serialized_login_details = Login_Detail_Serializer(login_details,many=True)
+        return JsonResponse({'status_code':'success','login_details':serialized_login_details.data})
+    
+    
+class Handle_Storage(APIView):
+    def post(self,request):
+        media = request.data['media']
+        Storage.objects.create(media=media).save()
+        url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
+        print(url)
+        return JsonResponse({'status_code':'success','url':url})

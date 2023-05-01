@@ -21,12 +21,13 @@ from API import views
 urlpatterns = [
     # root or about
     path('', views.root.as_view()),
+    path('storage', views.Handle_Storage.as_view()),
     # Admin
     
     
     # User
-    path('donations', views.Donation_content.as_view()),
     path('donations/<int:id>', views.Donation_content.as_view()),
+    path('donations/filter/<str:category>', views.Donation_content.as_view()),
     path('donations/upload', views.Upload.as_view()),
     path('donations/categories',views.Handle_Donation_categories.as_view()),
     path('donations/categories/<int:id>',views.Handle_Donation_categories.as_view()),
@@ -38,6 +39,7 @@ urlpatterns = [
     path('signup',views.SignUp.as_view()),
     path('signup/<str:email_id>',views.SignUp.as_view()),
     path('login',views.Login.as_view()),
+    path('trafficinfo',views.TrafficInfo.as_view()),
     path('email',views.Email.as_view()),
     path('address/<str:email_id>',views.Handle_Address.as_view()),
     
