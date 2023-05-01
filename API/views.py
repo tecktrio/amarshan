@@ -316,7 +316,7 @@ class Upload(APIView):
         => IMAGE  : platform, media_type, image, caption
         '''
         try:
-            profile_url = request.data['profile_url']
+            
             email_id = request.data['email_id']
             platform = request.data['platform']
             media_type = str(request.data['media_type']).upper()
@@ -329,10 +329,12 @@ class Upload(APIView):
             
             if not Donation_categories.objects.filter(name=category).exists():
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
-            
+            if not Users.objects.filter(email=email_id).exists():
+                return JsonResponse({'status_code':'failed','error':'email do not exist'})
+            profile_url = Users.objects.get(email=email_id)
             platform_list = platform.split(',')
         except Exception as e:
-            return JsonResponse({'Required fields':'email_id, profile_url,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
+            return JsonResponse({'Required fields':'email_id,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
         
         social_media = Social_Media()
