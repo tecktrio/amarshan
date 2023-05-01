@@ -827,6 +827,11 @@ class TrafficInfo(APIView):
 class Handle_Storage(APIView):
     def post(self,request):
         media = request.data['media']
+        try:
+            media.name.index(' ')
+            return JsonResponse({'status_code':'failed','status':'filename cannot contain spaces'})
+        except:
+            pass
         Storage.objects.create(media=media).save()
         url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
         print(url)
