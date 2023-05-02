@@ -1,69 +1,71 @@
 '''
+Author Details
+
+Author: AMal Benny
+Contact: amalpullan4@gmail.com
+
 This logic part is developed by amal benny. For any doughts you can contact bshootdevelopers@gmail.com
 '''
 
+'''
+API for Amarshan a whole new platform for donations  
+---------------------------------------------------------------------------------------------------------------------
+'''
+
 # Neccessary Modules for this app
-import datetime
-from django.core.mail import EmailMessage, get_connection
-from boto3.session import Session
-import os
-import smtplib
-import time
-import threading
-import requests
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.throttling import UserRateThrottle
+from modules import render
+from modules import JsonResponse
+from modules import APIView
+from modules import Users
+from modules import User_Serializer
+from modules import Login_details
+from modules import render_to_string
+from modules import datetime
+from modules import strip_tags
+from modules import send_mail
+from modules import EMAIL_HOST_USER
+from modules import Donations
+from modules import DonationContent_Serializer
+from modules import Donation_categories
+from modules import Donation_category_serializer
+from modules import Donation_Payment
+from modules import Donation_History
+from modules import Donation_History_Serializer
+from modules import Featured
+from modules import FeaturedContent_Serializer
+from modules import Response
+from modules import UserRateThrottle
+from modules import requests
+from modules import INSTAGRAM_BUSINESS_ACCOUNT_ID
+from modules import FACEBOOK_PAGE_ID
+from modules import ACCESS_TOKEN_FACEBOOK_PAGE
+from modules import time
+from modules import threading
+from modules import os
+from modules import Products
+from modules import Product_Serializer
+from modules import Categories
+from modules import Category_Serializer
+from modules import Notification
+from modules import Notification_serializer
+from modules import Categories
+from modules import User_Address_Serializer
+from modules import Orders
+from modules import Order_Serializer
+from modules import Login_details
+from modules import Login_Detail_Serializer
+from modules import Storage
+from modules import Payment_Serializer
 
-from API.models import Featured
-from API.models import Users
-from API.models import Products
-from API.models import Categories
-from API.models import Notification
-from API.models import Donation_categories
-from API.models import Donations
-from API.models import Login_details
 
-from API.serializers import DonationContent_Serializer
-from API.serializers import FeaturedContent_Serializer
-from API.serializers import User_Serializer
-from API.serializers import Product_Serializer
-from API.serializers import Category_Serializer
-from API.serializers import Donation_category_serializer
-from API.serializers import Notification_serializer
-from API.serializers import User_Address_Serializer
-from API.models import Orders
-from API.serializers import Order_Serializer
-from API.models import Donation_History
-from API.serializers import Donation_History_Serializer
-from API.serializers import Login_Detail_Serializer
-from API.models import Storage
-from API.models import Donation_Payment
-from API.serializers import Payment_Serializer
-from project_amarsha.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
-
-from project_amarsha.settings import EMAIL_HOST_USER
-from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
-from project_amarsha.settings import FACEBOOK_PAGE_ID
-from project_amarsha.settings import INSTAGRAM_BUSINESS_ACCOUNT_ID
-
-from django.core.mail import send_mail,EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.http import JsonResponse
-from django.shortcuts import render
-
+# Handling error pages in production environment
 
 def error_404(request,e):
     return render(request,'error/404.html')
 def error_500(request):
     return render(request,'error/500.html')
 
-'''
-API for Amarshan a whole new platform for donations
----------------------------------------------------
-'''
 
 class root(APIView):
     def get(self,request):
@@ -71,7 +73,6 @@ class root(APIView):
     def post(self,request):
         return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
 
-# Debugging
 class Login(APIView):
     '''
     Handles
@@ -87,7 +88,6 @@ class Login(APIView):
             email = request.data['email']
             password = request.data['password']
             login_type = request.data['login_type']
-            # device = request.data['device']
         except:
             return JsonResponse({'Required fields':'email, password, login_type'})
         if login_type == 'swe':
@@ -97,7 +97,6 @@ class Login(APIView):
                     serialized_user_data = User_Serializer(user)
                     # storing the login details 
                     device = request.device
-                    
                     Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
@@ -119,11 +118,11 @@ class Login(APIView):
 class SignUp(APIView):
     def post(self,request):
         try:
-            display_name = request.data['display_name']
-            email= request.data['email']
-            password= request.data['password']
-            profile_url = request.data['profile_url']
-            login_type = request.data['login_type']
+            display_name        = request.data['display_name']
+            email               = request.data['email']
+            password            = request.data['password']
+            profile_url         = request.data['profile_url']
+            login_type          = request.data['login_type']
         except:
             return JsonResponse({'Required fields :':'display_name, email, password, profile_url, login_type'})
         user_exist_status = Users.objects.filter(email = email).exists()
@@ -137,19 +136,15 @@ class SignUp(APIView):
     def put(self,request,email_id):
         if Users.objects.filter(email=email_id).exists():
             try:
-                display_name = request.data['display_name']
-                # email= request.data['email']
-                password= request.data['password']
-                profile_url = request.data['profile_url']
-                # login_type = request.data['login_type']
+                display_name    = request.data['display_name']
+                password        = request.data['password']
+                profile_url     = request.data['profile_url']
             except:
                 return JsonResponse({'Required fields :':'display_name, password, profile_url'})
-            user  =  Users.objects.get(email=email_id)
-            user.display_name = display_name
-            # user.email = email
-            user.password = password
-            user.profile_url = profile_url
-            # user.login_type = login_type
+            user                =  Users.objects.get(email=email_id)
+            user.display_name   = display_name
+            user.password       = password
+            user.profile_url    = profile_url
             user.save()
             return JsonResponse({'status_code':'success','status':'user profile updated'})
         else:
@@ -160,10 +155,10 @@ class SignUp(APIView):
 class Email(APIView):
     def post(self,request):
         try:
-            subject = request.data['subject']
-            message = request.data['message']
-            recipient_email = request.data['recipient_email']
-            template_model = request.data['template_model']
+            subject             = request.data['subject']
+            message             = request.data['message']
+            recipient_email     = request.data['recipient_email']
+            template_model      = request.data['template_model']
         except:
             return JsonResponse({'Required fields : ':'subject, message, recipient_email, template_model (otp, message)'})
         # email_from = EMAIL_HOST_USER
@@ -202,28 +197,25 @@ class Email(APIView):
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request,category):
-        
-        # print(request.mysecret_value)
-        print(category)
         if category =='all':
             donation_content = reversed(Donations.objects.all())
         else:
-            donation_content = reversed(Donations.objects.filter(category=category))
-        serialized_content = DonationContent_Serializer(donation_content,many = True)
+            donation_content     = reversed(Donations.objects.filter(category=category))
+        serialized_content       = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
     def put(self,request,id):
         try:
             current_amount = int(request.data['current_amount'])
-            heart = int(request.data['heart'])
+            heart          = int(request.data['heart'])
         except:
             return JsonResponse({'Required fields :':'current_amount, heart ,(options : status ["pending","rejected","running","completed"])'})
         
         if Donations.objects.filter(id=id).exists():
             try:
-                current_donation = Donations.objects.get(id=id)
-                current_donation.current_amount = current_amount
-                current_donation.heart = heart
+                current_donation                    = Donations.objects.get(id=id)
+                current_donation.current_amount     = current_amount
+                current_donation.heart              = heart
                 
                 try:
                     status = request.data['status']
@@ -231,16 +223,16 @@ class Donation_content(APIView):
                         current_donation.status = status
                         if status == 'completed':
                             try:
-                                completed_on = request.data['completed_on']
+                                completed_on         = request.data['completed_on']
                                 new_donation_history = Donation_History.objects.create(media_type = current_donation.media_type,
-                                                                                    target = current_donation.target,
-                                                                                    heart = current_donation.heart,
-                                                                                    title = current_donation.title,
-                                                                                    description = current_donation.description,
-                                                                                    location = current_donation.location,
+                                                                                    target        = current_donation.target,
+                                                                                    heart         = current_donation.heart,
+                                                                                    title         = current_donation.title,
+                                                                                    description   = current_donation.description,
+                                                                                    location      = current_donation.location,
                                                                                     donation_type = current_donation.donation_type,
-                                                                                    category = current_donation.category,
-                                                                                    upload_on = current_donation.upload_on,
+                                                                                    category      = current_donation.category,
+                                                                                    upload_on     = current_donation.upload_on,
                                                                                     completed_on  = completed_on,
                                                                                     )
                                 new_donation_history.save()
@@ -269,26 +261,31 @@ class Donation_content(APIView):
 class Featured_content(APIView):
     def post(self,request):
         try:
-            media_url = request.data['media_url']
-            profile_image_url = request.data['profile_image_url']
-            profile_username = request.data['profile_username']
-            organisation = request.data['organisation']
-            description = request.data['description']
-            location = request.data['location']
+            media_url           = request.data['media_url']
+            profile_image_url   = request.data['profile_image_url']
+            profile_username    = request.data['profile_username']
+            organisation        = request.data['organisation']
+            description         = request.data['description']
+            location            = request.data['location']
         except:
             return JsonResponse({'status_code':'failed','Required fields':'media_url, profile_image_url, profile_username, organisation, descripton, location'})
-        Featured.objects.create(media_url=media_url,profile_image_url=profile_image_url,profile_username=profile_username,organisation=organisation,description=description,location=location).save()
+        Featured.objects.create(media_url           =media_url,
+                                profile_image_url   =profile_image_url,
+                                profile_username    =profile_username,
+                                organisation        =organisation,
+                                description         =description,
+                                location            =location).save()
         return JsonResponse({"status":"done",'status_code':'success'})
     def get(self,request):
-        featured_content = Featured.objects.all()
-        serialized_content = FeaturedContent_Serializer(featured_content,many=True)
+        featured_content    = Featured.objects.all()
+        serialized_content  = FeaturedContent_Serializer(featured_content,many=True)
         return JsonResponse({"featured_content":serialized_content.data,'status_code':'success'})
     def put(self,request,id):
         if Featured.objects.filter(id=id).exists():
             try:
-                featured_content = Featured.objects.all()
+                featured_content    = Featured.objects.all()
                 featured_content.update(running_status = False)
-                this_content = Featured.objects.get(id = id)
+                this_content        = Featured.objects.get(id = id)
                 this_content.running_status = True
                 this_content.save()
             except:
@@ -319,22 +316,22 @@ class Upload(APIView):
         '''
         try:
             
-            email_id = request.data['email_id']
-            platform = request.data['platform']
-            media_type = str(request.data['media_type']).upper()
-            category = request.data['category']
-            location = request.data['location']
-            media_url = request.data['media_url']
-            title = request.data['title']
-            description = request.data['description']
-            target = int(request.data['target'])
+            email_id        = request.data['email_id']
+            platform        = request.data['platform']
+            media_type      = str(request.data['media_type']).upper()
+            category        = request.data['category']
+            location        = request.data['location']
+            media_url       = request.data['media_url']
+            title           = request.data['title']
+            description     = request.data['description']
+            target          = int(request.data['target'])
             
             if not Donation_categories.objects.filter(name=category).exists():
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
             if not Users.objects.filter(email=email_id).exists():
                 return JsonResponse({'status_code':'failed','error':'email do not exist'})
-            profile_url = Users.objects.get(email=email_id)
-            platform_list = platform.split(',')
+            profile_url         = Users.objects.get(email=email_id)
+            platform_list       = platform.split(',')
         except Exception as e:
             return JsonResponse({'Required fields':'email_id,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
@@ -420,13 +417,12 @@ class Social_Media:
         '''Required parameter :
         => video_url, title
         '''
-        print(video_url)
         if video_url is None:
             return JsonResponse({"Input Error":"video url cannot be empty and it should be valid"})
-        page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
-        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        get_url = f"https://graph.facebook.com/{page_id}/media"
-        data = {
+        page_id         = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
+        access_token    = ACCESS_TOKEN_FACEBOOK_PAGE
+        get_url         = f"https://graph.facebook.com/{page_id}/media"
+        data            = {
             "video_url":video_url,
             "caption":title,
             "access_token":access_token,
@@ -452,20 +448,20 @@ class Social_Media:
         '''
         page_id = FACEBOOK_PAGE_ID #facebook page id 
         access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        print('''****************** DEBUg ****************
+        # print('''****************** DEBUg ****************
         
-        page id :''',page_id,'''
-        video url : ''',video_url,'''
-        title : ''',title,'''
-        description : ''',description,'''
-        ''')
+        # page id :''',page_id,'''
+        # video url : ''',video_url,'''
+        # title : ''',title,'''
+        # description : ''',description,'''
+        # ''')
         url = f"https://graph.facebook.com/{page_id}/videos"
         print('Trying to upload the post to facebook page...requesting to url',url)
         data = {
-            "file_url":video_url,
-            "title":title,
-            "description":description,
-            "access_token":access_token,
+            "file_url"      :video_url,
+            "title"         :title,
+            "description"   :description,
+            "access_token"  :access_token,
         }
         
         response = requests.post(url,json=data)
@@ -493,22 +489,21 @@ class Social_Media:
                 # print('.',end="")
         print('download is done -_-')
         run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="live_yt.mp4" '
-        print(run)
         os.system(run)
         return True
     
     def Upload_video_to_amarshan(self, video_url,title,description,category,location,target,profile_url,email_id):
         try:
             Donations.objects.create(
-                media_url = video_url,
-                media_type = 'VIDEO',
-                title = title, 
-                description = description,
-                category = category,
-                location=location,
-                target = target,
-                profile_url = profile_url,
-                email_id = email_id
+                media_url       = video_url,
+                media_type      = 'VIDEO',
+                title           = title, 
+                description     = description,
+                category        = category,
+                location        =location,
+                target          = target,
+                profile_url     = profile_url,
+                email_id        = email_id
             ).save()
             return True
         except:
@@ -523,13 +518,13 @@ class Social_Media:
         Required parameters :
         => image_url, caption
         '''
-        page_id = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
-        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        get_url = "https://graph.facebook.com/v10.0/{}/media?image_url={}&access_token={}&caption={}".format(page_id,image_url,access_token,caption)
+        page_id         = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
+        access_token    = ACCESS_TOKEN_FACEBOOK_PAGE
+        get_url         = "https://graph.facebook.com/v10.0/{}/media?image_url={}&access_token={}&caption={}".format(page_id,image_url,access_token,caption)
         print('Requesting for the image container id...')
         print('hitting on url : ',get_url)
         # print(get_url)
-        response = requests.post(get_url)
+        response        = requests.post(get_url)
         print(response.json())
         if response.json().get('id') is None:
             return False
@@ -540,8 +535,8 @@ class Social_Media:
         ({"Error":"some unkown error occured"})
         print('image container id  : ',image_container_id)
         print('Trying to upload the post...')
-        post_url = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,image_container_id,access_token)
-        response = requests.post(post_url)
+        post_url    = "https://graph.facebook.com/v10.0/{}/media_publish?creation_id={}&access_token={}".format(page_id,image_container_id,access_token)
+        response    = requests.post(post_url)
         print('post id : ',response.json().get('id'))
         if response.json().get('id') is not None:
             return True
@@ -552,9 +547,9 @@ class Social_Media:
         '''Required parameters :
         => image_url, caption
         '''
-        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        page_id = FACEBOOK_PAGE_ID
-        response = requests.post("https://graph.facebook.com/{}/photos?access_token={}&url={}".format(page_id,access_token, image_url))
+        access_token    = ACCESS_TOKEN_FACEBOOK_PAGE
+        page_id         = FACEBOOK_PAGE_ID
+        response        = requests.post("https://graph.facebook.com/{}/photos?access_token={}&url={}".format(page_id,access_token, image_url))
         print(response.json())
         if response.status_code == 200:
             print('Post created successfully!')
@@ -566,19 +561,19 @@ class Social_Media:
     def Upload_image_to_amarshan(self,image_url, title, description, category,location,target,profile_url,email_id):
         try:
             Donations.objects.create(
-                media_url = image_url,
-                media_type = 'IMAGE',
-                title = title, 
+                media_url   = image_url,
+                media_type  = 'IMAGE',
+                title       = title, 
                 description = description,
-                category = category,
-                location = location,
-                target = target,
+                category    = category,
+                location    = location,
+                target      = target,
                 profile_url = profile_url,
-                email_id = email_id
+                email_id    = email_id
             ).save()
             return True
         except Exception as e:
-            print(e)
+            print('Exception',e)
             return False
         
    
@@ -598,15 +593,15 @@ class Handle_Products(APIView):
         return Response({'products':serialized_data.data})
     def post(self,request):
         try:
-            name = request.data['name']
-            price =request.data['price']
-            description = request.data['description']
-            category = request.data['category']
-            rating = request.data['rating']
-            image_1_url = request.data['image_1_url']
-            image_2_url = request.data['image_2_url']
-            image_3_url = request.data['image_3_url']
-            image_4_url = request.data['image_4_url']
+            name            = request.data['name']
+            price           =request.data['price']
+            description     = request.data['description']
+            category        = request.data['category']
+            rating          = request.data['rating']
+            image_1_url     = request.data['image_1_url']
+            image_2_url     = request.data['image_2_url']
+            image_3_url     = request.data['image_3_url']
+            image_4_url     = request.data['image_4_url']
         except:
             return JsonResponse({'status_code':'failed','Required fields':'name, description, category, rating, image_1_url, image_2_url, image_3_url, image_4_url, price'})
         try:
@@ -622,11 +617,11 @@ class Handle_Products(APIView):
     def put(self,request,filter):
         if Products.objects.filter(id=filter).exists():
             try:
-                name = request.data['name']
-                price =request.data['price']
+                name        = request.data['name']
+                price       = request.data['price']
                 description = request.data['description']
-                category = request.data['category']
-                rating = request.data['rating']
+                category    = request.data['category']
+                rating      = request.data['rating']
                 image_1_url = request.data['image_1_url']
                 image_2_url = request.data['image_2_url']
                 image_3_url = request.data['image_3_url']
@@ -636,12 +631,12 @@ class Handle_Products(APIView):
         
         
             try:
-                product  = Products.objects.get(id=filter)
-                product.name = name
-                product.price = price
+                product             = Products.objects.get(id=filter)
+                product.name        = name
+                product.price       = price
                 product.description = description
-                product.category = category 
-                product.rating = rating
+                product.category    = category 
+                product.rating      = rating
                 product.image_1_url = image_1_url
                 product.image_2_url = image_2_url
                 product.image_3_url = image_3_url
@@ -663,15 +658,15 @@ class Handle_Products(APIView):
         
 class Handle_categories(APIView):
     def get(self,request):
-        categories = Categories.objects.all()
-        Serialized_categories = Category_Serializer(categories,many=True)
+        categories              = Categories.objects.all()
+        Serialized_categories   = Category_Serializer(categories,many=True)
         return JsonResponse({'categories':Serialized_categories.data})
     def post(self,request):
         try:
             
-            name = request.data['name']
-            description = request.data['description']
-            image_url = request.data['image_url']
+            name            = request.data['name']
+            description     = request.data['description']
+            image_url       = request.data['image_url']
         except Exception as e:
             return JsonResponse({'status_code':'failed','Required Fields' : 'name, description, image_url'})
         
@@ -701,9 +696,9 @@ class Handle_Donation_categories(APIView):
     def put(self,request,id):
         if Donation_categories.objects.filter(id=id).exists():
             try:
-                image_url = request.data['image_url']
-                catogory =  Donation_categories.objects.get(id=id)
-                catogory.image_url = image_url
+                image_url           = request.data['image_url']
+                catogory            = Donation_categories.objects.get(id=id)
+                catogory.image_url  = image_url
                 catogory.save()
                 return JsonResponse({'status_code':'success','status':'catagory updated successfully'})
             except:
@@ -713,8 +708,8 @@ class Handle_Donation_categories(APIView):
         
 class Handle_Notifications(APIView):
     def get(self, request):
-        notifications = Notification.objects.all()
-        serialized_notifications = Notification_serializer(notifications,many=True)
+        notifications               = Notification.objects.all()
+        serialized_notifications    = Notification_serializer(notifications,many=True)
         return JsonResponse({'status_code':'success','notifications':serialized_notifications.data})
     def post(self,request):
         try:
@@ -744,8 +739,8 @@ class Handle_Notifications(APIView):
 class Handle_Address(APIView):
     def get(self,request,email_id):
         if Users.objects.filter(email = email_id).exists():
-            user = Users.objects.get(email = email_id)
-            user_address_serialized = User_Address_Serializer(user)
+            user                        = Users.objects.get(email = email_id)
+            user_address_serialized     = User_Address_Serializer(user)
             return JsonResponse({'address':user_address_serialized.data,'status_code':'success'})
         else:
             return JsonResponse({'status':'email id does not exist','status_code':'failed'})
@@ -753,15 +748,15 @@ class Handle_Address(APIView):
             if Users.objects.filter(email = email_id).exists():
                 user = Users.objects.get(email = email_id)
                 try:
-                    user.display_name = request.data['display_name']
-                    user.building_name = request.data['building_name']
-                    user.street_name  = request.data['street_name']
-                    user.pincode   = request.data['pincode']
-                    user.city = request.data['city']
-                    user.state = request.data['state']
-                    user.country = request.data['country']
-                    user.landmark = request.data['landmark']
-                    user.phone_number = request.data['phone_number']
+                    user.display_name       = request.data['display_name']
+                    user.building_name      = request.data['building_name']
+                    user.street_name        = request.data['street_name']
+                    user.pincode            = request.data['pincode']
+                    user.city               = request.data['city']
+                    user.state              = request.data['state']
+                    user.country            = request.data['country']
+                    user.landmark           = request.data['landmark']
+                    user.phone_number       = request.data['phone_number']
                     user.save()
                     return JsonResponse({'status':'address updated succesfully','status_code':'success'})
                 except:
@@ -771,27 +766,33 @@ class Handle_Address(APIView):
 class Handle_myorders(APIView):
     def get(self,request,email_id):
         if Users.objects.filter(email = email_id).exists():
-            orders = Orders.objects.filter(email_id=email_id)
-            user = Users.objects.get(email = email_id)
+            orders                  = Orders.objects.filter(email_id=email_id)
+            user                    = Users.objects.get(email = email_id)
             user_address_serialized = User_Address_Serializer(user)
-            serialized_orders = Order_Serializer(orders,many= True)
+            serialized_orders       = Order_Serializer(orders,many= True)
             return JsonResponse({'status_code':'success','order_details':serialized_orders.data,'address_details':user_address_serialized.data})
         else:
             return JsonResponse({'status_code':'failed','error':' Invalide email id'})
     def post(self,request,email_id):
         if Users.objects.filter(email = email_id).exists():
             try:   
-                product_name = request.data['product_name']
-                product_description = request.data['product_description']
-                product_price = request.data['product_price']
-                product_image_url = request.data['product_image_url']
-                item_count = request.data['item_count']
-                ordered_on = request.data['ordered_on']
+                product_name            = request.data['product_name']
+                product_description     = request.data['product_description']
+                product_price           = request.data['product_price']
+                product_image_url       = request.data['product_image_url']
+                item_count              = request.data['item_count']
+                ordered_on              = request.data['ordered_on']
             except:
                 return JsonResponse({'status_code':'failed','Required fields':'product_name, product_description, product_price, product_image_url, item_count, ordered_on'})
        
             try:
-                Orders.objects.create(email_id=email_id, product_name=product_name, product_description=product_description, product_price=product_price, product_image_url=product_image_url,item_count = item_count,ordered_on=ordered_on).save()
+                Orders.objects.create(email_id=email_id,
+                                      product_name=product_name,
+                                      product_description=product_description, 
+                                      product_price=product_price, 
+                                      product_image_url=product_image_url,
+                                      item_count = item_count,
+                                      ordered_on=ordered_on).save()
                 return JsonResponse({'status_code':'success','orders':'order places succesfully'})
             except Exception as e:
                 return JsonResponse({'status_code':'failed','error':str(e)})
@@ -845,7 +846,6 @@ class Handle_Storage(APIView):
             pass
         Storage.objects.create(media=media).save()
         url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
-        print(url)
         return JsonResponse({'status_code':'success','url':url})
     
 class Handle_Payment(APIView):
@@ -858,11 +858,11 @@ class Handle_Payment(APIView):
     
     def post(self,request,email):
         try:
-            user_email_id = email
-            amount = request.data["amount"]
-            public_email_id = request.data['public_email']
-            donation_title = request.data['donation_title']
-            donation_id = request.data['donation_id']
+            user_email_id       = email
+            amount              = request.data["amount"]
+            public_email_id     = request.data['public_email']
+            donation_title      = request.data['donation_title']
+            donation_id         = request.data['donation_id']
         except:
             return JsonResponse({'status_code':'failed','Required':'amount, public_email, donation_title, donation_id'})
 
