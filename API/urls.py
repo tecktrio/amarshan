@@ -47,7 +47,7 @@ urlpatterns = [
     #for post request ( add product )
     path('shopping/products',views.Handle_Products.as_view()),
     path('shopping/orders/<str:email_id>',views.Handle_myorders.as_view()),
-    path('shopping/orders/<str:email_id>/<str:order_id>',views.Handle_myorders.as_view()),
+    path('shopping/orders/<str:order_id>',views.Handle_myorders.as_view()),
     # path('shopping/orders',views.Handle_Products.as_view()),
     #get request
     path('shopping/products/<str:filter>',views.Handle_Products.as_view()),
