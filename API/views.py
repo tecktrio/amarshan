@@ -795,7 +795,7 @@ class Handle_myorders(APIView):
                 return JsonResponse({'status_code':'failed','error':str(e)})
         else:
             return JsonResponse({'status_code':'failed','error':' Invalide email id'})
-    def put(self,request,email_id,order_id):
+    def put(self,request,order_id):
         try:
             status = request.data['status']
         except:
@@ -812,6 +812,13 @@ class Handle_myorders(APIView):
                 return JsonResponse({'status_code':'failed','error':'status can only be pending, delivered, cancelled, shipping, ordered, processing '})
         else:
             return JsonResponse({'status_code':'failed','error':'order id does not exist'})
+    def delete(self,request,id):
+        try:
+            Orders.objects.get(id=id).delete()
+            return JsonResponse({'status_code':'success'})
+        except Exception as e:
+            return JsonResponse({'status_code':'failed','error':str|(e)})
+            
         
 class Handle_Donation_History(APIView):
     def get(self,request):
