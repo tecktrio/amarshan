@@ -39,6 +39,8 @@ from API.models import Donation_History
 from API.serializers import Donation_History_Serializer
 from API.serializers import Login_Detail_Serializer
 from API.models import Storage
+from API.models import Donation_Payment
+from API.serializers import Payment_Serializer
 from project_amarsha.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
 
 from project_amarsha.settings import EMAIL_HOST_USER
@@ -845,3 +847,28 @@ class Handle_Storage(APIView):
         url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
         print(url)
         return JsonResponse({'status_code':'success','url':url})
+    
+class Handle_Payment(APIView):
+    def get(self,request,email):
+        if not Donation_Payment.objects.filter(user_email_id=email).exists():
+            return JsonResponse({'status_code':'failed','error':'no payment history'})
+        data = Donation_Payment.objects.filter(user_email_id = email)
+        Serialized_payment = Payment_Serializer(data,many=True)
+        return JsonResponse({'status_code':'success','payment':Serialized_payment.data})
+    
+    def post(self,request,email):
+        user_email_id = email
+        amount = request.data["amount"]
+        public_email_id = request.data['public_email']
+        donation_title = request.data['donation_title']
+        donation_id = request.data['donation_id']
+
+        try:
+            Donation_Payment.objects.create(amount=amount,
+                                            user_email_id=user_email_id,
+                                            donation_title=donation_title,
+                                            donation_id=donation_id,
+                                            public_email_id=public_email_id).save()
+            return JsonResponse({'status_code':'success'})
+        except Exception as e:
+            return JsonResponse({'status_code':'failed','error':str(e)})
