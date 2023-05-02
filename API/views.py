@@ -857,11 +857,14 @@ class Handle_Payment(APIView):
         return JsonResponse({'status_code':'success','payment':Serialized_payment.data})
     
     def post(self,request,email):
-        user_email_id = email
-        amount = request.data["amount"]
-        public_email_id = request.data['public_email']
-        donation_title = request.data['donation_title']
-        donation_id = request.data['donation_id']
+        try:
+            user_email_id = email
+            amount = request.data["amount"]
+            public_email_id = request.data['public_email']
+            donation_title = request.data['donation_title']
+            donation_id = request.data['donation_id']
+        except:
+            return JsonResponse({'status_code':'failed','Required':'amount, public_email, donation_title, donation_id'})
 
         try:
             Donation_Payment.objects.create(amount=amount,
