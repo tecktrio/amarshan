@@ -42,6 +42,8 @@ urlpatterns = [
     path('trafficinfo',views.TrafficInfo.as_view()),
     path('email',views.Email.as_view()),
     path('address/<str:email_id>',views.Handle_Address.as_view()),
+    path('payment/<str:email>',views.Handle_Payment.as_view()),
+    # path('payment',views.Handle_Payment.as_view()),
     
     # Shopping
     #for post request ( add product )

@@ -137,3 +137,14 @@ class Donation_History(models.Model):
     category        = models.CharField(max_length=200,default='')
     upload_on       = models.CharField(max_length=100,default='')
     completed_on    = models.CharField(max_length=100,default='')
+    
+
+class Donation_Payment(models.Model):
+    amount          = models.IntegerField()
+    public_email_id   = models.CharField(max_length=100)
+    user_email_id   = models.CharField(max_length=100)
+    user_contact    = models.IntegerField(default=None,null=True)
+    # payment_status  = models.CharField(max_length=200,choices=(('')))
+    donation_title  = models.CharField(max_length=300)
+    donation_id     = models.IntegerField()
+    
