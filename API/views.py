@@ -812,9 +812,9 @@ class Handle_myorders(APIView):
                 return JsonResponse({'status_code':'failed','error':'status can only be pending, delivered, cancelled, shipping, ordered, processing '})
         else:
             return JsonResponse({'status_code':'failed','error':'order id does not exist'})
-    def delete(self,request,id):
+    def delete(self,request,order_id):
         try:
-            Orders.objects.get(id=id).delete()
+            Orders.objects.get(id=order_id).delete()
             return JsonResponse({'status_code':'success'})
         except Exception as e:
             return JsonResponse({'status_code':'failed','error':str|(e)})
