@@ -13,6 +13,7 @@ API for Amarshan a whole new platform for donations
 '''
 
 # Neccessary Modules for this app
+# run pip install -r requirement.txt to install the modules
 
 from modules import render
 from modules import JsonResponse
@@ -60,13 +61,12 @@ from modules import Payment_Serializer
 
 
 # Handling error pages in production environment
-
 def error_404(request,e):
     return render(request,'error/404.html')
 def error_500(request):
     return render(request,'error/500.html')
 
-
+# handle root url
 class root(APIView):
     def get(self,request):
         return JsonResponse({'welcome to amarshan api. please contact bshootdevelopers@gmail.com for any help, endpoints of this url for testing : email, login, signup, donations, upload, featured'})
@@ -84,39 +84,79 @@ class Login(APIView):
     5. store the login status of users
     '''
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of user                                       #              
+        #   password        :   valid password for new user                            #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
+            
+            # collecting data from request
             email = request.data['email']
             password = request.data['password']
             login_type = request.data['login_type']
         except:
+            
+            # handle errors on data
             return JsonResponse({'Required fields':'email, password, login_type'})
+        
+        # handles login_type swe
         if login_type == 'swe':
             if Users.objects.filter(email=email).exists():
                 user= Users.objects.get(email=email)
                 if user.password == password:
                     serialized_user_data = User_Serializer(user)
-                    # storing the login details 
                     device = request.device
                     Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
                     return JsonResponse({'status_code':'success','user':serialized_user_data.data})
                 return JsonResponse({'status_code':'failed','error':'incorrect password'})
             return JsonResponse({'status_code':'failed','error':'user email id does not exist'})
+        
+        # handles login_type swg
         elif login_type == 'swg':
             if Users.objects.filter(email=email).exists():
                 user= Users.objects.get(email=email)
                 serialized_user_data = User_Serializer(user)
                 Login_details.objects.create(email = email).save()
                 return JsonResponse({'status_code':'success','user':serialized_user_data.data})
+        
+        # handles for wrong login_type
+        return JsonResponse({'status_code':'failed','error':'login_type is invalid, options are swe and swg'})
+    
     def get(self,request):
+        #******************************************************************************#
+        #    handle get request comming to endpoint login                                                            
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})            
     def put(self,request):
+        #******************************************************************************#
+        #   handle put request comming to endpoint login                               #
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a put request to this url'})
     def delete(self,request):
+        #******************************************************************************#
+        #   handle delete request comming to endpoint login                            #
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a delete request to this url'})
             
             
 class SignUp(APIView):
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   display_name    :   name of the user shown in public                       #              
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #   profile_url     :   profile image url                                      #              
+        #                                                                              # 
+        #*******************************************************************************
         try:
             display_name        = request.data['display_name']
             email               = request.data['email']
@@ -132,8 +172,14 @@ class SignUp(APIView):
         else:
             return JsonResponse({"error":"user email id already exist.",'status_code':"failed"})
     def get(self,request):
+        #******************************************************************************#
+        #  handle get request comming to endpoint SignUp                                #
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
     def put(self,request,email_id):
+        #******************************************************************************#
+        #   handle put request comming to endpoint SignUp                               #
+        #*******************************************************************************
         if Users.objects.filter(email=email_id).exists():
             try:
                 display_name    = request.data['display_name']
@@ -150,10 +196,22 @@ class SignUp(APIView):
         else:
             return JsonResponse({'status_code':'failed','error':'email id do not exist'})
     def delete(self,request):
+        #******************************************************************************#
+        #   handle delete request comming to endpoint SignUp                            #
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a delete request to this url'})
             
 class Email(APIView):
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   subject            :   suject to send                                      #              
+        #   message            :   message to send                                     #
+        #   recipient_email    :   receiver email id                                   #
+        #   template_model     :   otp or message                                      #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             subject             = request.data['subject']
             message             = request.data['message']
@@ -161,50 +219,70 @@ class Email(APIView):
             template_model      = request.data['template_model']
         except:
             return JsonResponse({'Required fields : ':'subject, message, recipient_email, template_model (otp, message)'})
-        # email_from = EMAIL_HOST_USER
-        # recipient_list = [recipient_email, ]
-        # send_mail( subject, message, email_from, recipient_list )
         try:
+            
+            # handle otp 
             if template_model =='otp':
                 try:
                     html_content = render_to_string('mail/otp.html',{'otp':message})
                 except:
                     return JsonResponse({'error':'render to string error, mail not send','status_code':'failed'})
+                
+            # handle message
             if template_model == 'message':
                 html_content = render_to_string('mail/message.html',{'message':message})
             text_content = strip_tags(html_content)
             
+            # send mail
             try:
-               
                 send_mail(
                     subject,
                     text_content,
                     EMAIL_HOST_USER,
                     [recipient_email,]
                 )
+                return JsonResponse({'status':'mail send successfully','status_code':'success'})
             except Exception as e:
                 return JsonResponse({'error':'email error, mail not send','status_code':'failed','reason':str(e)})
      
         except Exception as e:
             print(e)
             return JsonResponse({'error':'unkown error, mail not send','status_code':'failed'})
-        return JsonResponse({'status':'mail send successfully','status_code':'success'})
+        
     def get(self,request):
+        #******************************************************************************#
+        #      handle delete request comming to endpoint Email                         # 
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a post request to this url'})
     def delete(self,request):
+        #******************************************************************************#
+        #   handle delete request comming to endpoint Email                            #
+        #*******************************************************************************
                 return JsonResponse({'you are just a kid, you are not allowed to send a delete request to this url'})
             
 #Endpoint to Upload File
 class Donation_content(APIView):
     def get(self,request,category):
+        #******************************************************************************#
+        #  handle delete request comming to endpoint Donation_content                  # 
+        #*******************************************************************************
         if category =='all':
             donation_content = reversed(Donations.objects.all())
         else:
             donation_content     = reversed(Donations.objects.filter(category=category))
+        
+        # serializing the data to send response
         serialized_content       = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})
 
     def put(self,request,id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   current_amount           :   current amount in accont                      #              
+        #   heart                    :   similar to like                               #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             current_amount = int(request.data['current_amount'])
             heart          = int(request.data['heart'])
@@ -252,6 +330,9 @@ class Donation_content(APIView):
             return JsonResponse(({'status_code':'failed','error':'id does not exist'}))
         
     def delete(self,request,id):
+        #******************************************************************************#
+        #  handle delete request comming to endpoint Donation_content                  #
+        #*******************************************************************************
         if Donations.objects.filter(id=id).exists():
             Donations.objects.filter(id=id).delete()
             return JsonResponse({'status_code':'success','status':'Donation added successfully'})
@@ -260,6 +341,17 @@ class Donation_content(APIView):
         
 class Featured_content(APIView):
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   media_url           :   it should be video url (mp4)                       #              
+        #   profile_image_url   :   profile image                                      #
+        #   profile_username    :   mention login method, options are                  #
+        #   organisation        :   mention login method, options are                  #
+        #   description         :   description about the featured                     #
+        #   location            :   location of specific content                       #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             media_url           = request.data['media_url']
             profile_image_url   = request.data['profile_image_url']
@@ -277,10 +369,28 @@ class Featured_content(APIView):
                                 location            =location).save()
         return JsonResponse({"status":"done",'status_code':'success'})
     def get(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         featured_content    = Featured.objects.all()
         serialized_content  = FeaturedContent_Serializer(featured_content,many=True)
         return JsonResponse({"featured_content":serialized_content.data,'status_code':'success'})
     def put(self,request,id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Featured.objects.filter(id=id).exists():
             try:
                 featured_content    = Featured.objects.all()
@@ -294,6 +404,15 @@ class Featured_content(APIView):
         else:
             return JsonResponse({'status_code':'failed','status':'please provide a valid id'})
     def delete(self,request,id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Featured.objects.filter(id=id).exists():
             try:
                 Featured.objects.get(id=id).delete()
@@ -309,6 +428,15 @@ class Upload(APIView):
     status = False
     
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''Listen to post request to the upload endpoint
         required parameter  :
         => VIDEO  : platform, media_type, video_url, title, description, tag
@@ -387,6 +515,15 @@ class Upload(APIView):
             
 
     def get(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''Listen to the get request for the endpoint upload'''
         return JsonResponse({"The method is not accessble. please try post using the fields :","For video => * video_url, * title, * description, * tag, * platform, * media type.","For Image =>* image, *caption, *platform, media_type"})
     
@@ -396,6 +533,15 @@ class Upload(APIView):
 class Social_Media:
     
     def uploading_thread_method(self,video_container_id,access_token,page_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         count = 0
         while requests.get("https://graph.facebook.com/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
             print(count, 'seconds',end='\r')
@@ -414,6 +560,15 @@ class Social_Media:
      -----------------------------------------------------------------------
     '''
     def Upload_video_to_instagram(self,video_url,title):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''Required parameter :
         => video_url, title
         '''
@@ -443,6 +598,15 @@ class Social_Media:
         return  True
     
     def Upload_video_to_facebook(self,video_url,title,description):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''Required parameters
         => video_url, title, description
         '''
@@ -473,6 +637,15 @@ class Social_Media:
             return True
         
     def Upload_video_to_youtube(self, video_url,title,description,tag):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''Required parameters
         => video_url, title, description, tag
         '''
@@ -493,6 +666,15 @@ class Social_Media:
         return True
     
     def Upload_video_to_amarshan(self, video_url,title,description,category,location,target,profile_url,email_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             Donations.objects.create(
                 media_url       = video_url,
@@ -514,6 +696,15 @@ class Social_Media:
     ----------------------------------------------------------------
     '''
     def Upload_image_to_instagram(self,image_url,caption):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''
         Required parameters :
         => image_url, caption
@@ -544,6 +735,15 @@ class Social_Media:
             return False
 
     def Upload_image_to_facebook(self, image_url,caption):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         '''Required parameters :
         => image_url, caption
         '''
@@ -559,6 +759,15 @@ class Social_Media:
             return False
         
     def Upload_image_to_amarshan(self,image_url, title, description, category,location,target,profile_url,email_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             Donations.objects.create(
                 media_url   = image_url,
@@ -582,6 +791,15 @@ class Social_Media:
 
 class Handle_Products(APIView):
     def get(self,request,filter):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         
         if filter == 'all':
             filter_result = Products.objects.all()
@@ -592,6 +810,15 @@ class Handle_Products(APIView):
         serialized_data = Product_Serializer(filter_result,many=True)
         return Response({'products':serialized_data.data})
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             name            = request.data['name']
             price           =request.data['price']
@@ -615,6 +842,15 @@ class Handle_Products(APIView):
             return JsonResponse({'status_code':'failed','error':'could not create the product, fields or data error while trying to save the new product'})
         return JsonResponse({'status':'new product added successfully','status_code':'success'})
     def put(self,request,filter):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Products.objects.filter(id=filter).exists():
             try:
                 name        = request.data['name']
@@ -650,6 +886,15 @@ class Handle_Products(APIView):
         else:
             return JsonResponse({'status_code':'failed','status':'The product id does not exists or product already deleted'})
     def delete(self,request,filter):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Products.objects.filter(id=filter).exists():
             Products.objects.get(id=filter).delete()
             return JsonResponse({'status_code':'success','status':'product deleted successfully'})
@@ -658,10 +903,28 @@ class Handle_Products(APIView):
         
 class Handle_categories(APIView):
     def get(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         categories              = Categories.objects.all()
         Serialized_categories   = Category_Serializer(categories,many=True)
         return JsonResponse({'categories':Serialized_categories.data})
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             
             name            = request.data['name']
@@ -680,10 +943,28 @@ class Handle_categories(APIView):
 
 class Handle_Donation_categories(APIView):
     def get(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         category = Donation_categories.objects.all()
         serialized_categories = Donation_category_serializer(category,many=True)
         return JsonResponse({'status_code':'successs','categories':serialized_categories.data})
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             name = request.data['name']
             description= request.data['description']
@@ -694,6 +975,15 @@ class Handle_Donation_categories(APIView):
         Donation_categories.objects.create(name=name, description= description).save()
         return JsonResponse({'status_code':'success','status':'category created successfully'})
     def put(self,request,id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Donation_categories.objects.filter(id=id).exists():
             try:
                 image_url           = request.data['image_url']
@@ -708,10 +998,28 @@ class Handle_Donation_categories(APIView):
         
 class Handle_Notifications(APIView):
     def get(self, request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         notifications               = Notification.objects.all()
         serialized_notifications    = Notification_serializer(notifications,many=True)
         return JsonResponse({'status_code':'success','notifications':serialized_notifications.data})
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             try:
                 title = request.data['title']
@@ -727,6 +1035,15 @@ class Handle_Notifications(APIView):
         except Exception as e:
             return JsonResponse({'status_code':'failed','error':e})
     def delete(self,request,id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Notification.objects.filter(id=id).exists():
             try:
                 Notification.objects.get(id=id).delete()
@@ -738,6 +1055,15 @@ class Handle_Notifications(APIView):
 
 class Handle_Address(APIView):
     def get(self,request,email_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Users.objects.filter(email = email_id).exists():
             user                        = Users.objects.get(email = email_id)
             user_address_serialized     = User_Address_Serializer(user)
@@ -745,6 +1071,15 @@ class Handle_Address(APIView):
         else:
             return JsonResponse({'status':'email id does not exist','status_code':'failed'})
     def put(self,request,email_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
             if Users.objects.filter(email = email_id).exists():
                 user = Users.objects.get(email = email_id)
                 try:
@@ -765,6 +1100,15 @@ class Handle_Address(APIView):
         
 class Handle_myorders(APIView):
     def get(self,request,email_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Users.objects.filter(email = email_id).exists():
             orders                  = Orders.objects.filter(email_id=email_id)
             user                    = Users.objects.get(email = email_id)
@@ -774,6 +1118,15 @@ class Handle_myorders(APIView):
         else:
             return JsonResponse({'status_code':'failed','error':' Invalide email id'})
     def post(self,request,email_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if Users.objects.filter(email = email_id).exists():
             try:   
                 product_name            = request.data['product_name']
@@ -799,6 +1152,15 @@ class Handle_myorders(APIView):
         else:
             return JsonResponse({'status_code':'failed','error':' Invalide email id'})
     def put(self,request,order_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             status = request.data['status']
         except:
@@ -816,6 +1178,15 @@ class Handle_myorders(APIView):
         else:
             return JsonResponse({'status_code':'failed','error':'order id does not exist'})
     def delete(self,request,order_id):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
             Orders.objects.get(id=order_id).delete()
             return JsonResponse({'status_code':'success'})
@@ -825,12 +1196,30 @@ class Handle_myorders(APIView):
         
 class Handle_Donation_History(APIView):
     def get(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         donations_done = Donation_History.objects.all()
         donations_done_serialized = Donation_History_Serializer(donations_done,many=True)
         return JsonResponse({'status_code':'success','history':donations_done_serialized.data})
     
 class TrafficInfo(APIView):
     def get(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         login_details = reversed(Login_details.objects.all())
         serialized_login_details = Login_Detail_Serializer(login_details,many=True)
         return JsonResponse({'status_code':'success','login_details':serialized_login_details.data})
@@ -838,6 +1227,15 @@ class TrafficInfo(APIView):
     
 class Handle_Storage(APIView):
     def post(self,request):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         media = request.data['media']
         try:
             media.name.index(' ')
@@ -850,6 +1248,15 @@ class Handle_Storage(APIView):
     
 class Handle_Payment(APIView):
     def get(self,request,email):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         if not Donation_Payment.objects.filter(user_email_id=email).exists():
             return JsonResponse({'status_code':'failed','error':'no payment history'})
         data = Donation_Payment.objects.filter(user_email_id = email)
@@ -857,12 +1264,21 @@ class Handle_Payment(APIView):
         return JsonResponse({'status_code':'success','payment':Serialized_payment.data})
     
     def post(self,request,email):
+        #******************************************************************************#
+        #   Required Fields                                                            #
+        # --------------------                                                         #
+        #   email           :   email id of new user                                   #              
+        #   password        :   new password for new user                              #
+        #   login_type      :   mention login method, options are                      #
+        #                       ('swe' - signup with email,'swg' - signup with google) #
+        #                                                                              # 
+        #*******************************************************************************
         try:
-            user_email_id       = email
-            amount              = request.data["amount"]
+            user_email_id       = int(email)
+            amount              = int(request.data["amount"])
             public_email_id     = request.data['public_email']
             donation_title      = request.data['donation_title']
-            donation_id         = request.data['donation_id']
+            donation_id         = int(request.data['donation_id'])
         except:
             return JsonResponse({'status_code':'failed','Required':'amount, public_email, donation_title, donation_id'})
 
