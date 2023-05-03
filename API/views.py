@@ -201,13 +201,11 @@ class SignUp(APIView):
         if Users.objects.filter(email=email_id).exists():
             try:
                 display_name    = request.data['display_name']
-                password        = make_password(request.data['password'])
                 profile_url     = request.data['profile_url']
             except:
-                return JsonResponse({'Required fields :':'display_name, password, profile_url'})
+                return JsonResponse({'Required fields :':'display_name, profile_url'})
             user                =  Users.objects.get(email=email_id)
             user.display_name   = display_name
-            user.password       = password
             user.profile_url    = profile_url
             user.save()
             return JsonResponse({'status_code':'success','status':'user profile updated'})
