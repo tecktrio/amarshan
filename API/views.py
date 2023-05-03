@@ -15,6 +15,7 @@ API for Amarshan a whole new platform for donations
 # Neccessary Modules for this app
 # run pip install -r requirement.txt to install the modules
 
+import json
 from modules import render
 from modules import make_password
 from modules import check_password
@@ -104,8 +105,8 @@ class Login(APIView):
             
             # collecting data from request
             email = request.data['email']
-            password = make_password(request.data['password'],PASSWORD_ENCRYPTION_KEY)
-            print(password)
+            _password = request.data['password']
+            password = make_password(_password,PASSWORD_ENCRYPTION_KEY)
             login_type = request.data['login_type']
         except:
             
@@ -117,6 +118,7 @@ class Login(APIView):
             if Users.objects.filter(email=email).exists():
                 user= Users.objects.get(email=email)
                 if user.password == password:
+                    user.password = _password
                     serialized_user_data = User_Serializer(user)
                     device = request.device
                     Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
