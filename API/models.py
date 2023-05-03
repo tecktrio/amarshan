@@ -32,7 +32,7 @@ class Storage(models.Model):
 class Users(models.Model):
     display_name        = models.CharField(max_length=30)
     email               = models.CharField(max_length=30)
-    password            = models.CharField(max_length=30)
+    password            = models.CharField(max_length=200)
     gender              = models.CharField(choices=(('male','male'),('female','female'),('other','other')),max_length=30)
     dob                 = models.CharField(default="",max_length=50)
     profile_url         = models.CharField(max_length=500,default="")
