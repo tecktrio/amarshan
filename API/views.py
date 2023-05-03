@@ -105,8 +105,8 @@ class Login(APIView):
             
             # collecting data from request
             email = request.data['email']
-            # password = request.data['password']
-            password = make_password(request.data['password'],PASSWORD_ENCRYPTION_KEY)
+            _password = request.data['password']
+            password = make_password(_password,PASSWORD_ENCRYPTION_KEY)
             login_type = request.data['login_type']
         except:
             
@@ -118,7 +118,7 @@ class Login(APIView):
             if Users.objects.filter(email=email).exists():
                 user= Users.objects.get(email=email)
                 if user.password == password:
-                    # user.password = _password
+                    user.password = _password
                     serialized_user_data = User_Serializer(user)
                     device = request.device
                     Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
@@ -1195,7 +1195,6 @@ class Handle_myorders(APIView):
         #   Required Fields                                                            #
         # --------------------                                                         #
         #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
         #   login_type      :   mention login method, options are                      #
         #                       ('swe' - signup with email,'swg' - signup with google) #
         #                                                                              # 
@@ -1328,3 +1327,16 @@ class Handle_User_Wallet(APIView):
                 return JsonResponse({'status_code':'failed','error':str(e)})
         else:
             return JsonResponse({'status_code':'failed','error':'wallet not found for this email, please signup. wallet is created on signup'})
+
+class Handle_User_Change_Password(APIView):
+    def put(self,request,email):
+        if not Users.objects.filter().exists():
+            return JsonResponse({'status_code':'failed','status':'email id does not exist'})
+        try:
+            newpassword = request.data['password']
+            user = Users.objects.get(email=email)
+            user.password = make_password(newpassword,PASSWORD_ENCRYPTION_KEY)
+            user.save()
+            return JsonResponse({'status_code':'success','status':'password changed successfully'})
+        except:
+            return JsonResponse({'status_code':'failed','Required':'password'})

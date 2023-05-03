@@ -33,6 +33,7 @@ urlpatterns = [
     
     # handling login urls
     path('login',views.Login.as_view()),
+    path('changepassword/<str:email>',views.Handle_User_Change_Password.as_view()),
     
     # handling trafficinfo
     path('trafficinfo',views.TrafficInfo.as_view()),
