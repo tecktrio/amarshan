@@ -1316,7 +1316,7 @@ class Handle_User_Wallet(APIView):
                 return JsonResponse({'status_code':'failed','Required':'amount'})
             try:
                 wallet = User_Wallet.objects.get(email=email)
-                wallet.amount = new_amount
+                wallet.amount = wallet.amount+new_amount
                 wallet.save()
                 return JsonResponse({'status_code':'success'})
             except Exception as e:
