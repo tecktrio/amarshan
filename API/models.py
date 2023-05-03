@@ -182,7 +182,7 @@ class Donation_Payment(models.Model):
     
 class User_Wallet(models.Model):
     amount              = models.IntegerField()
-    email_id            = models.CharField(max_length=100)
+    email               = models.CharField(max_length=100)
 
     
     def __str__(self) -> str:
