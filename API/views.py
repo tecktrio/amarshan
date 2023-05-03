@@ -105,8 +105,8 @@ class Login(APIView):
             
             # collecting data from request
             email = request.data['email']
-            _password = request.data['password']
-            password = make_password(_password,PASSWORD_ENCRYPTION_KEY)
+            # password = request.data['password']
+            password = make_password(request.data['password'],PASSWORD_ENCRYPTION_KEY)
             login_type = request.data['login_type']
         except:
             
@@ -118,7 +118,7 @@ class Login(APIView):
             if Users.objects.filter(email=email).exists():
                 user= Users.objects.get(email=email)
                 if user.password == password:
-                    user.password = _password
+                    # user.password = _password
                     serialized_user_data = User_Serializer(user)
                     device = request.device
                     Login_details.objects.create(email = email,device =device,login_time=str(datetime.datetime.now())).save()
@@ -201,7 +201,7 @@ class SignUp(APIView):
         if Users.objects.filter(email=email_id).exists():
             try:
                 display_name    = request.data['display_name']
-                password        = request.data['password']
+                password        = make_password(request.data['password'])
                 profile_url     = request.data['profile_url']
             except:
                 return JsonResponse({'Required fields :':'display_name, password, profile_url'})
