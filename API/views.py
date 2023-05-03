@@ -346,8 +346,8 @@ class Featured_content(APIView):
         # --------------------                                                         #
         #   media_url           :   it should be video url (mp4)                       #              
         #   profile_image_url   :   profile image                                      #
-        #   profile_username    :   mention login method, options are                  #
-        #   organisation        :   mention login method, options are                  #
+        #   profile_username    :   username of profile                                #
+        #   organisation        :   name of organisation of the content                #
         #   description         :   description about the featured                     #
         #   location            :   location of specific content                       #
         #                                                                              # 
@@ -361,22 +361,19 @@ class Featured_content(APIView):
             location            = request.data['location']
         except:
             return JsonResponse({'status_code':'failed','Required fields':'media_url, profile_image_url, profile_username, organisation, descripton, location'})
+        
+        # creating new featured content
         Featured.objects.create(media_url           =media_url,
                                 profile_image_url   =profile_image_url,
                                 profile_username    =profile_username,
                                 organisation        =organisation,
                                 description         =description,
                                 location            =location).save()
+        
         return JsonResponse({"status":"done",'status_code':'success'})
     def get(self,request):
         #******************************************************************************#
-        #   Required Fields                                                            #
-        # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
+        #   handle delete request comming to endpoint Donation_content                 #
         #*******************************************************************************
         featured_content    = Featured.objects.all()
         serialized_content  = FeaturedContent_Serializer(featured_content,many=True)
@@ -1274,7 +1271,7 @@ class Handle_Payment(APIView):
         #                                                                              # 
         #*******************************************************************************
         try:
-            user_email_id       = int(email)
+            user_email_id       = email
             amount              = int(request.data["amount"])
             public_email_id     = request.data['public_email']
             donation_title      = request.data['donation_title']
