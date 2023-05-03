@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -85,12 +85,14 @@ DATABASES = DATABASES={
             'ENGINE':'django.db.backends.mysql',
             'NAME': 'amarshan',
             'USER': 'root',
-            'PASSWORD': 'password',
+            'PASSWORD': '1234',
          }
         }
 
-
-
+PASSWORD_HASHERS = [
+  'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+  'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+]
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [

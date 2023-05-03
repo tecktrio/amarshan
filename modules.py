@@ -50,3 +50,5 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password

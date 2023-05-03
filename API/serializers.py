@@ -24,7 +24,8 @@ class FeaturedContent_Serializer(serializers.ModelSerializer):
 class User_Serializer(serializers.ModelSerializer):
     class Meta:
         model  = Users
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('password', )
         
 class Product_Serializer(serializers.ModelSerializer):
     class Meta:
