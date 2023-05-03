@@ -62,6 +62,7 @@ class Login_details(models.Model):
     
 class Donations(models.Model):
     email_id            = models.CharField(max_length=200,default='')
+    platform            = models.CharField(max_length=200,default='')
     profile_url         = models.CharField(max_length=200,default='')
     media_url           = models.CharField(max_length=500)
     media_type          = models.CharField(max_length=20)
@@ -186,5 +187,5 @@ class User_Wallet(models.Model):
 
     
     def __str__(self) -> str:
-        return self.email_id
+        return self.email
     

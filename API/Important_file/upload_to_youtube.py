@@ -38,7 +38,16 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 #   https://developers.google.com/youtube/v3/guides/authentication
 # For more information about the client_secrets.json file format, see:
 #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-CLIENT_SECRETS_FILE = "client_secret.json"
+
+#######################################################################################################
+#
+#       wanted to change the youtube credential, please find the file named youtube_secret.json
+#       and edit the client id and client secret from your google console.
+#       make sure the youtube data api is enabled
+#
+#######################################################################################################
+
+CLIENT_SECRETS_FILE = "youtube_secret.json"
 
 # This OAuth 2.0 access scope allows an application to upload files to the
 # authenticated user's YouTube channel, but doesn't allow other types of access.
@@ -155,14 +164,14 @@ def resumable_upload(insert_request):
 
 if __name__ == '__main__':
   argparser.add_argument("--file", required=True, help="Video file to upload")
-  argparser.add_argument("--title", help="Video title", default="Test Title")
+  argparser.add_argument("--title", help="Video title", default="Title")
   argparser.add_argument("--description", help="Video description",
-    default="Test Description")
+    default="Description")
   argparser.add_argument("--category", default="22",
     help="Numeric video category. " +
       "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
   argparser.add_argument("--keywords", help="Video keywords, comma separated",
-    default="")
+    default="AMARSHAN,amarshan,donations")
   argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
     default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
   args = argparser.parse_args()
