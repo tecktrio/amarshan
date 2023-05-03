@@ -145,3 +145,4 @@ ACCESS_TOKEN_FOR_AMARSHAN_APP = config('ACCESS_TOKEN_FOR_AMARSHAN_APP')
 # setting up django email backend
 EMAIL_BACKEND   = 'django_ses.SESBackend'
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')#sender's email-id
+PASSWORD_ENCRYPTION_KEY = config['PASSWORD_ENCRYPTION_KEY']

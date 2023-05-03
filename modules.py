@@ -38,7 +38,7 @@ from API.serializers import Login_Detail_Serializer
 from API.models import Storage
 from API.models import Donation_Payment
 from API.serializers import Payment_Serializer
-from project_amarsha.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME
+from project_amarsha.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME,PASSWORD_ENCRYPTION_KEY
 
 from project_amarsha.settings import EMAIL_HOST_USER
 from project_amarsha.settings import ACCESS_TOKEN_FACEBOOK_PAGE
