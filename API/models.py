@@ -180,3 +180,11 @@ class Donation_Payment(models.Model):
     def __str__(self) -> str:
         return self.user_email_id
     
+class User_Wallet(models.Model):
+    amount              = models.IntegerField()
+    email_id            = models.CharField(max_length=100)
+
+    
+    def __str__(self) -> str:
+        return self.email_id
+    

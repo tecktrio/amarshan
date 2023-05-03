@@ -15,6 +15,7 @@ API for Amarshan a whole new platform for donations
 # Neccessary Modules for this app
 # run pip install -r requirement.txt to install the modules
 
+from API_backend.API.models import User_Wallet
 from modules import render
 from modules import JsonResponse
 from modules import APIView
@@ -167,10 +168,17 @@ class SignUp(APIView):
             return JsonResponse({'Required fields :':'display_name, email, password, profile_url, login_type'})
         user_exist_status = Users.objects.filter(email = email).exists()
         if not user_exist_status:
+            
+            # creating new user
             Users.objects.create(display_name=display_name,email=email,password=password,profile_url=profile_url,login_type=login_type).save()
+            
+            # opening wallet for the new user
+            User_Wallet.objects.create(email=email, amount = 0).save()
+
             return JsonResponse({'status':'user created successfully','status_code':'success'})
         else:
             return JsonResponse({"error":"user email id already exist.",'status_code':"failed"})
+        
     def get(self,request):
         #******************************************************************************#
         #  handle get request comming to endpoint SignUp                                #
@@ -1288,3 +1296,26 @@ class Handle_Payment(APIView):
             return JsonResponse({'status_code':'success'})
         except Exception as e:
             return JsonResponse({'status_code':'failed','error':str(e)})
+        
+class Handle_User_Wallet(APIView):
+    def get(self,request,email):
+        if User_Wallet.objects.filter(email = email).exists():
+            wallet = User_Wallet.objects.get(email=email)
+            return JsonResponse({'status_code':'success','wallet':wallet})
+        else:
+            return JsonResponse({'status_code':'failed','error':'wallet not found for this email, please signup. wallet is created on signup'})
+    def put(self,request,email):
+        if User_Wallet.objects.filter(email = email).exists():
+            try:
+                new_amount = request.data['amount']
+            except:
+                return JsonResponse({'status_code':'failed','Required':'amount'})
+            try:
+                wallet = User_Wallet.objects.get(email=email)
+                wallet.amount = new_amount
+                wallet.save()
+                return JsonResponse({'status_code':'success'})
+            except Exception as e:
+                return JsonResponse({'status_code':'failed','error':str(e)})
+        else:
+            return JsonResponse({'status_code':'failed','error':'wallet not found for this email, please signup. wallet is created on signup'})
