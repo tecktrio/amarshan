@@ -17,6 +17,7 @@ API for Amarshan a whole new platform for donations
 
 from modules import render
 from modules import User_Wallet
+from modules import User_Wallet_Serializer
 from modules import JsonResponse
 from modules import APIView
 from modules import Users
@@ -63,9 +64,11 @@ from modules import Payment_Serializer
 
 # Handling error pages in production environment
 def error_404(request,e):
-    return render(request,'error/404.html')
+    return JsonResponse({'status':'page not fount, check the url'})
+    # return render(request,'error/404.html')
 def error_500(request):
-    return render(request,'error/500.html')
+    return JsonResponse({'status':'page not fount, check the url'})
+    # return render(request,'error/500.html')
 
 # handle root url
 class root(APIView):
@@ -1301,7 +1304,8 @@ class Handle_User_Wallet(APIView):
     def get(self,request,email):
         if User_Wallet.objects.filter(email = email).exists():
             wallet = User_Wallet.objects.get(email=email)
-            return JsonResponse({'status_code':'success','wallet':wallet})
+            serialized_wallet = User_Wallet_Serializer(wallet)
+            return JsonResponse({'status_code':'success','wallet':serialized_wallet.data})
         else:
             return JsonResponse({'status_code':'failed','error':'wallet not found for this email, please signup. wallet is created on signup'})
     def put(self,request,email):

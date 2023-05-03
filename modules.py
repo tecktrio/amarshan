@@ -21,6 +21,7 @@ from API.models import Donation_categories
 from API.models import Donations
 from API.models import Login_details
 
+from API.serializers import User_Wallet_Serializer
 from API.serializers import DonationContent_Serializer
 from API.serializers import FeaturedContent_Serializer
 from API.serializers import User_Serializer
