@@ -11,6 +11,7 @@ from API.models import Orders
 from API.models import Donation_History
 from API.models import Login_details
 from API.models import Donation_Payment
+from API.models import User_Wallet
 
 class DonationContent_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -67,4 +68,9 @@ class Login_Detail_Serializer(serializers.ModelSerializer):
 class Payment_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Donation_Payment
+        fields = '__all__'      
+               
+class User_Wallet_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = User_Wallet
         fields = '__all__'
