@@ -45,6 +45,7 @@ urlpatterns = [
     
     # handling payment urls
     path('payment/<str:email>',views.Handle_Payment.as_view()),
+    path('wallet/<str:email>',views.Handle_User_Wallet.as_view()),
     
     #f handling shop urls
     path('shopping/products',                   views.Handle_Products.as_view()),
