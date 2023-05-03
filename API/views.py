@@ -15,8 +15,8 @@ API for Amarshan a whole new platform for donations
 # Neccessary Modules for this app
 # run pip install -r requirement.txt to install the modules
 
-from API_backend.API.models import User_Wallet
 from modules import render
+from modules import User_Wallet
 from modules import JsonResponse
 from modules import APIView
 from modules import Users

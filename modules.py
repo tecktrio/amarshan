@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
+from API.models import User_Wallet
 from API.models import Featured
 from API.models import Users
 from API.models import Products
