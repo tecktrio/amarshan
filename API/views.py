@@ -444,19 +444,23 @@ class Upload(APIView):
         #******************************************************************************#
         #   Required Fields                                                            #
         # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
+        #   email_id        :   email id of new user                                   #              
+        #   platform        :   list of social media platform                          #
+        #   media_type      :   mention login method, options are                      #
+        #   category        :   provide valid donation category                        #
+        #   location        :   location from where the content belongs to             #
+        #   media_url       :   provide the media url in mp4 or jpg format             #
+        #   title           :   title of the content                                   #
+        #   description     :   description of the content                             #
+        #   target          :   target amount of the donation                          # 
         #*******************************************************************************
         '''Listen to post request to the upload endpoint
         required parameter  :
+        
         => VIDEO  : platform, media_type, video_url, title, description, tag
         => IMAGE  : platform, media_type, image, caption
         '''
         try:
-            
             email_id        = request.data['email_id']
             platform        = request.data['platform']
             media_type      = str(request.data['media_type']).upper()
@@ -467,75 +471,92 @@ class Upload(APIView):
             description     = request.data['description']
             target          = int(request.data['target'])
             
+            # validating the category
             if not Donation_categories.objects.filter(name=category).exists():
                 return JsonResponse({'status_code':'failed','error':'category do not exist'})
+            # validating the email id
             if not Users.objects.filter(email=email_id).exists():
                 return JsonResponse({'status_code':'failed','error':'email do not exist'})
-            profile_url         = Users.objects.get(email=email_id)
+            
+            profile_url         = Users.objects.get(email=email_id).profile_url
             platform_list       = platform.split(',')
         except Exception as e:
             return JsonResponse({'Required fields':'email_id,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
-        
+        # creating instance of social_media class
         social_media = Social_Media()
+        
+        # creating donatin history
+        
+        # handle video
+        platform = []
         
         if media_type == "VIDEO":
             if 'instagram' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_instagram(media_url,title)
+                    if self.status:
+                        platform.append('instagram')
                 except Exception as e:
-                    if not self.status:
-                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to instagram'})
+                    pass
             if 'facebook' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_facebook(media_url,title,description)
+                    if self.status:
+                        platform.append('facebook')
                 except Exception as e:
-                    if not self.status :
-                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to facebook or limit exceed'})
+                   pass
             if 'youtube' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
+                    if self.status:
+                        platform.append('youtube')
                 except Exception as e:
-                    if not self.status :
-                        return Response({'reason':str(e),'status':'failed','error':'video could not upload to youtube or limit exceed'})
+                    pass
             if 'amarshan' in platform_list:
-                self.status = social_media.Upload_video_to_amarshan(media_url,title,description,category,location, target,profile_url, email_id) 
-                
+                    platform.append('amarshan')                
+        # handle image        
         elif media_type == "IMAGE":
             if 'instagram' in platform_list:
                 try:
                     self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
+                    if self.status:
+                        platform.append('instagram')
                 except Exception as e:
-                    if not self.status:
-                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to instagram'})
+                        pass
             if 'facebook' in platform_list:
                 try:
                     self.status = social_media.Upload_image_to_facebook(media_url,title )
+                    if self.status:
+                        platform.append('facebook')
                 except Exception as e:
-                    if not self.status:
-                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to facebook'})
+                        pass
             if 'amarshan' in platform_list: 
                 try:
-                    self.status = social_media.Upload_image_to_amarshan(image_url=media_url,title=title,description = description,category = category,location=location,target=target,profile_url=profile_url,email_id=email_id) 
+                    platform.append('amarshan')
                 except Exception as e:
-                    if not self.status:
-                        return Response({'reason':str(e),'status':'failed','error':'image could not upload to amarshan'})
+                    pass
+                
+        Donations.objects.create(
+                media_url       = media_url,
+                media_type      = media_type,
+                title           = title, 
+                description     = description,
+                category        = category,
+                location        = location,
+                target          = target,
+                profile_url     = profile_url,
+                email_id        = email_id,
+                platform        = ','.join(platform)
+            ).save()
+                    
         # return true if video uploaded to all platforms
-        if self.status:
-            return JsonResponse({"status_code":'success','status':'donation content uploaded successfully'})
-        else:
-            return JsonResponse({"status_code":'failed'})
+        return JsonResponse({"status_code":'success','status':'Content are successfully uploaded','platform': str(','.join(platform))})
             
 
     def get(self,request):
         #******************************************************************************#
-        #   Required Fields                                                            #
-        # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
+        #   handle delete request comming to endpoint Donation_content                                                          #
         #*******************************************************************************
         '''Listen to the get request for the endpoint upload'''
         return JsonResponse({"The method is not accessble. please try post using the fields :","For video => * video_url, * title, * description, * tag, * platform, * media type.","For Image =>* image, *caption, *platform, media_type"})
@@ -545,28 +566,23 @@ class Upload(APIView):
 '''
 class Social_Media:
     
+    # thread for instagram video
     def uploading_thread_method(self,video_container_id,access_token,page_id):
         #******************************************************************************#
-        #   Required Fields                                                            #
-        # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
+        #    handle uploading thread of instagram                                      #
         #*******************************************************************************
-        count = 0
+        print('Startted uploading media to instagram...')
         while requests.get("https://graph.facebook.com/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
-            print(count, 'seconds',end='\r')
-            count += 1
             time.sleep(1)
-
-        print('Making the video public...')
+        print('Media uploaded to instagram successfully')
+        print('Making the instagram video public accessable')
         post_url = "https://graph.facebook.com/{}/media_publish?creation_id={}&access_token={}".format(page_id,video_container_id,access_token)
-        response = requests.post(post_url)
-        print('post id : ',response.json().get('id'))
-        return True
-        
+        try:
+            response = requests.post(post_url)
+            print('post is available at instagram id : ',response.json().get('id'))
+            return True
+        except:
+            return False
         
     '''
      uploading video
@@ -585,86 +601,74 @@ class Social_Media:
         '''Required parameter :
         => video_url, title
         '''
+        # validating the video_url
         if video_url is None:
             return JsonResponse({"Input Error":"video url cannot be empty and it should be valid"})
-        page_id         = INSTAGRAM_BUSINESS_ACCOUNT_ID #instagram bussiness account id
-        access_token    = ACCESS_TOKEN_FACEBOOK_PAGE
-        get_url         = f"https://graph.facebook.com/{page_id}/media"
+        
+        # collecting the neccassary data for instagram upload
+        get_url         = f"https://graph.facebook.com/{INSTAGRAM_BUSINESS_ACCOUNT_ID}/media"
         data            = {
             "video_url":video_url,
             "caption":title,
-            "access_token":access_token,
+            "access_token":ACCESS_TOKEN_FACEBOOK_PAGE,
             "media_type":"VIDEO",
         }
-        print('Requesting for the video container id for instagram ...')
+        
+        # sending request
+        print('Requesting video container id from instagram...')
         response = requests.post(get_url,json=data)
         print(response.json())
+        
+        # collecting video container id
         video_container_id = int(response.json().get('id'))
+        
+        # validating the contatiner
         if video_container_id is None:
             return JsonResponse({'status':'failed to get the container id from graph api'})
-        print('Uploaded successfully...')
-        print('image container id  : ',video_container_id)
         
-        threading.Thread(target=self.uploading_thread_method,args=(video_container_id,access_token,page_id)).start()
-
-        print("The video will be posted to instagram account successfully after completing the processing....")
-        return  True
+        print('Got container id ',video_container_id)
+        
+        #starting thread to upload
+        threading.Thread(target=self.uploading_thread_method,
+                         args=(video_container_id,
+                               ACCESS_TOKEN_FACEBOOK_PAGE,
+                               INSTAGRAM_BUSINESS_ACCOUNT_ID)).start()
+        return True
     
     def Upload_video_to_facebook(self,video_url,title,description):
         #******************************************************************************#
-        #   Required Fields                                                            #
-        # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
+        #   upload video to facebook                                                   #
         #*******************************************************************************
-        '''Required parameters
-        => video_url, title, description
-        '''
-        page_id = FACEBOOK_PAGE_ID #facebook page id 
-        access_token = ACCESS_TOKEN_FACEBOOK_PAGE
-        # print('''****************** DEBUg ****************
+        url = f"https://graph.facebook.com/{FACEBOOK_PAGE_ID}/videos"
         
-        # page id :''',page_id,'''
-        # video url : ''',video_url,'''
-        # title : ''',title,'''
-        # description : ''',description,'''
-        # ''')
-        url = f"https://graph.facebook.com/{page_id}/videos"
-        print('Trying to upload the post to facebook page...requesting to url',url)
+        # setting up the data to upload
         data = {
             "file_url"      :video_url,
             "title"         :title,
             "description"   :description,
-            "access_token"  :access_token,
+            "access_token"  :ACCESS_TOKEN_FACEBOOK_PAGE,
         }
         
+        # sending request
         response = requests.post(url,json=data)
-        print(response.json())
-        print('post id : ',response.json().get('id'))
         if response.json().get('id') is None:
             return False
         else:
+            print('post is availble at facebook id ',response.json().get('id'))
             return True
         
     def Upload_video_to_youtube(self, video_url,title,description,tag):
         #******************************************************************************#
         #   Required Fields                                                            #
-        # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
         #*******************************************************************************
         '''Required parameters
         => video_url, title, description, tag
         '''
         chuck_size = 256
+        
+        # downloading video from url
         downloaded_video = requests.get(video_url,stream=True)
-        print('downloading',end="")
+        print('Starting to download video from the url, please wait... ',video_url,end="")
         try:
             os.remove('live_yt.mp4')
         except:
@@ -672,34 +676,22 @@ class Social_Media:
         with open('live_yt.mp4',"wb") as f:
             for chunk in downloaded_video.iter_content(chunk_size=chuck_size):
                 f.write(chunk)
-                # print('.',end="")
-        print('download is done -_-')
-        run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="live_yt.mp4" '
-        os.system(run)
-        return True
+        print('Downloaded successfully')
+        
+        # uploading video to youtube
+        print("Starting uploading media to youtube")
+        try:
+            run = f'py API/Important_file/upload_to_youtube.py  --title="{title}" --description="{description}" --keywords="{tag}"  --file="live_yt.mp4" '
+            os.system(run)
+            return True
+        except:
+            return False
     
     def Upload_video_to_amarshan(self, video_url,title,description,category,location,target,profile_url,email_id):
         #******************************************************************************#
         #   Required Fields                                                            #
-        # --------------------                                                         #
-        #   email           :   email id of new user                                   #              
-        #   password        :   new password for new user                              #
-        #   login_type      :   mention login method, options are                      #
-        #                       ('swe' - signup with email,'swg' - signup with google) #
-        #                                                                              # 
         #*******************************************************************************
         try:
-            Donations.objects.create(
-                media_url       = video_url,
-                media_type      = 'VIDEO',
-                title           = title, 
-                description     = description,
-                category        = category,
-                location        =location,
-                target          = target,
-                profile_url     = profile_url,
-                email_id        = email_id
-            ).save()
             return True
         except:
             return False
