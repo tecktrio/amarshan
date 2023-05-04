@@ -752,12 +752,11 @@ class Social_Media:
         '''Required parameters :
         => image_url, caption
         '''
-        access_token    = ACCESS_TOKEN_FACEBOOK_PAGE
-        page_id         = FACEBOOK_PAGE_ID
-        response        = requests.post("https://graph.facebook.com/{}/photos?access_token={}&url={}".format(page_id,access_token, image_url))
+      
+        response  = requests.post("https://graph.facebook.com/{}/photos?access_token={}&url={}".format(FACEBOOK_PAGE_ID,ACCESS_TOKEN_FACEBOOK_PAGE, image_url))
         print(response.json())
         if response.status_code == 200:
-            print('Post created successfully!')
+            print('Post created successfully on facebook')
             return True
         else:
             print('Error creating post:', response.json()['error']['message'])
@@ -1263,7 +1262,7 @@ class Handle_Payment(APIView):
         #*******************************************************************************
         if not Donation_Payment.objects.filter(user_email_id=email).exists():
             return JsonResponse({'status_code':'failed','error':'no payment history'})
-        data = Donation_Payment.objects.filter(user_email_id = email)
+        data = reversed(Donation_Payment.objects.filter(user_email_id = email))
         Serialized_payment = Payment_Serializer(data,many=True)
         return JsonResponse({'status_code':'success','payment':Serialized_payment.data})
     
