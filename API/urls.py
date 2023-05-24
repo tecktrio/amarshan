@@ -60,6 +60,12 @@ urlpatterns = [
     # handling notifications urls
     path('notifications',           views.Handle_Notifications.as_view()),
     path('notifications/<int:id>',  views.Handle_Notifications.as_view()),
+    path('notifications/<int:id>',  views.Handle_Notifications.as_view()),
+    
+    path('bank',  views.Handle_Bank_Accounts.as_view()),
+    path('bank/<str:email_id>',  views.Handle_Bank_Accounts.as_view()),
+    
+    
     
     
 ]
