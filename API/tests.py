@@ -1,3 +1,25 @@
-from widecity_bill_generator import gst
+import io
+import os
 
-gst.generate('appu',1234567890,24234,'543534',"fjasfdja")
+# Imports the Google Cloud client library
+from google.cloud import vision
+
+# Instantiates a client
+client = vision.ImageAnnotatorClient(credentials='API_backend/youtube_secret.json')
+
+# The name of the image file to annotate
+file_name = os.path.abspath('API_backend/API/test.jpg')
+
+# Loads the image into memory
+with io.open(file_name, 'rb') as image_file:
+    content = image_file.read()
+
+image = vision.Image(content=content)
+
+# Performs label detection on the image file
+response = client.label_detection(image=image)
+labels = response.label_annotations
+
+print('Labels:')
+for label in labels:
+    print(label.description)

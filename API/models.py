@@ -52,6 +52,15 @@ class Users(models.Model):
     def __str__(self) -> str:
         return self.display_name
     
+class Bank_Accounts(models.Model):
+    account_number = models.CharField(max_length=50)
+    account_holder_name = models.CharField(max_length=100)
+    ifsc_code = models.CharField(max_length=15)
+    user_email_id = models.CharField(max_length=200)
+    
+    def __str__(self) -> str:
+        return self.user_email_id
+    
 class Login_details(models.Model):
     email               = models.CharField(max_length=100)
     login_time          = models.CharField(default='',max_length=50)

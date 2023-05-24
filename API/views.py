@@ -16,6 +16,8 @@ API for Amarshan a whole new platform for donations
 # run pip install -r requirement.txt to install the modules
 
 import json
+from API_backend.API.models import Bank_Accounts
+from API_backend.API.serializers import Bank_Account_Serializers
 from modules import render
 from modules import make_password
 from modules import check_password
@@ -1331,3 +1333,30 @@ class Handle_User_Change_Password(APIView):
             return JsonResponse({'status_code':'success','status':'password changed successfully'})
         except:
             return JsonResponse({'status_code':'failed','Required':'password'})
+
+class Handle_Bank_Accounts(APIView):
+    def post(request):
+        try:
+            email = request.data['user_email_id']
+            account_number = request.data['account_number']
+            ifsc = request.data['ifsc']
+            account_holder_name = request.data['account_holder_name']
+            
+            if Bank_Accounts.objects.filter(user_email_id = email).exists():
+                return JsonResponse({"status":'failed','error':'user already have account'})
+            
+            new_account = Bank_Accounts.objects.create(user_email_id=email,
+                                                       account_number=account_number,
+                                                       ifsc=ifsc,
+                                                       account_holder_name=account_holder_name).save()
+        except:
+            return JsonResponse({'error':'Requires user_email_id, account_number, ifsc, account_holder_name'})
+    def get(request, email_id):
+        if Bank_Accounts.objects.filter(user_email_id = email_id).exists():
+            account_details = Bank_Accounts.objects.filter(user_email_id=email_id)
+            serialized = Bank_Account_Serializers(account_details,many=True)
+            
+            return JsonResponse({'status':'success','account_details':serialized.data})
+        else:
+            return JsonResponse({'status':'failed','error':'user dont have an account'})
+            
