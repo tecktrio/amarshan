@@ -12,7 +12,7 @@ from API.models import Donation_History
 from API.models import Login_details
 from API.models import Donation_Payment
 from API.models import User_Wallet
-from API_backend.API.models import Bank_Accounts
+from API.models import Bank_Accounts
 
 class DonationContent_Serializer(serializers.ModelSerializer):
     class Meta:
