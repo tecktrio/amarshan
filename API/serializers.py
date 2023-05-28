@@ -13,6 +13,7 @@ from API.models import Login_details
 from API.models import Donation_Payment
 from API.models import User_Wallet
 from API.models import Bank_Accounts
+from API.models import WithDraw_Requests
 
 class DonationContent_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -79,4 +80,9 @@ class User_Wallet_Serializer(serializers.ModelSerializer):
 class Bank_Account_Serializers(serializers.ModelSerializer):
     class Meta:
         model = Bank_Accounts
+        fields = '__all__'   
+                          
+class WithDraw_Request_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = WithDraw_Requests
         fields = '__all__'
