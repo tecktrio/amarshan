@@ -85,6 +85,7 @@ class Donations(models.Model):
     category            = models.CharField(max_length=200,default='')
     upload_on           = models.CharField(max_length=200,default='')
     status              = models.CharField(max_length=200,default='pending',choices=(('pending','pending'),('rejected','rejected'),('running','running'),('completed','completed')))
+    funding_account     = models.CharField(max_length=200,choices=(('amarshan','amarshan'),('user','user')),default='amarshan')
 
     def __str__(self) -> str:
         return self.email_id
@@ -197,4 +198,15 @@ class User_Wallet(models.Model):
     
     def __str__(self) -> str:
         return self.email
+        
+class WithDraw_Requests(models.Model):
+    account_number = models.CharField(max_length=50)
+    account_holder_name = models.CharField(max_length=100)
+    ifsc_code = models.CharField(max_length=15)
+    user_email_id = models.CharField(max_length=200)
+    amount = models.CharField(max_length=200)
+    status = models.CharField(max_length=100,choices=(('pending','pending'),('approved','approved'),('not_approved','not_approved')),default='pending')
+
+    def __str__(self) -> str:
+        return self.user_email_id
     

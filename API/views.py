@@ -27,6 +27,8 @@ from modules import User_Wallet_Serializer
 from modules import JsonResponse
 from modules import APIView
 from modules import Users
+from modules import WithDraw_Requests
+from modules import WithDraw_Request_Serializers
 from modules import User_Serializer
 from modules import Login_details
 from modules import render_to_string
@@ -1251,7 +1253,31 @@ class Handle_Storage(APIView):
         Storage.objects.create(media=media).save()
         url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
         return JsonResponse({'status_code':'success','url':url})
-    
+class Handle_WidthDraw(APIView):
+    def get(self,request):
+        requests = WithDraw_Requests.objects.all()
+        serialized_requests = WithDraw_Request_Serializers(requests,many=True)
+        return JsonResponse({'status':'success','data':serialized_requests.data})
+    def post(self,request):
+        try:
+            account_number = request.data['account_number']
+            account_holder_name = request.data['account_holder_name']
+            ifsc_code = request.data['ifsc_code']
+            user_email_id = request.data['user_email_id']
+            amount = request.data['amount']
+            try:
+                newWithdrawRequest = WithDraw_Requests.objects.create(account_number=account_number,
+                                                                      account_holder_name=account_holder_name,
+                                                                      ifsc_code=ifsc_code,
+                                                                      user_email_id=user_email_id,
+                                                                      amount=amount)
+                newWithdrawRequest.save()
+                return JsonResponse({'status':'success'})
+            except:
+                return JsonResponse({'status':'failed','error':'request cannot be made successfully'})
+        except:
+            return JsonResponse({'status':'failed','Required':'account_number, account_holder_name, ifsc_code, user_email_id, amount'})
+        return JsonResponse({'status':'success'})
 class Handle_Payment(APIView):
     def get(self,request,email):
         #******************************************************************************#
