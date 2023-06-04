@@ -283,15 +283,21 @@ class Email(APIView):
             
 #Endpoint to Upload File
 class Donation_content(APIView):
-    def get(self,request,category):
+    def get(self,request,filter):
         #******************************************************************************#
         #  handle delete request comming to endpoint Donation_content                  # 
         #*******************************************************************************
-        if category =='all':
+        if filter =='all':
             donation_content = reversed(Donations.objects.all())
         else:
-            donation_content     = reversed(Donations.objects.filter(category=category))
-        
+            filtered = ''
+            try:
+                filtered = int(filter)
+                donation_content     = reversed(Donations.objects.filter(id=filtered))
+            except:
+                filtered = filter
+                donation_content     = reversed(Donations.objects.filter(category=filtered))
+            
         # serializing the data to send response
         serialized_content       = DonationContent_Serializer(donation_content,many = True)
         return JsonResponse({"donation_content":serialized_content.data})

@@ -17,7 +17,7 @@ urlpatterns = [
 
     # handle donation urls
     path('donations/<int:id>',              views.Donation_content.as_view()),
-    path('donations/filter/<str:category>', views.Donation_content.as_view()),
+    path('donations/filter/<str:filter>', views.Donation_content.as_view()),
     path('donations/upload',                views.Upload.as_view()),
     path('donations/categories',            views.Handle_Donation_categories.as_view()),
     path('donations/categories/<int:id>',   views.Handle_Donation_categories.as_view()),
