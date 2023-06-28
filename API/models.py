@@ -206,7 +206,7 @@ class WithDraw_Requests(models.Model):
     user_email_id = models.CharField(max_length=200)
     amount = models.CharField(max_length=200)
     status = models.CharField(max_length=100,choices=(('pending','pending'),('approved','approved'),('not_approved','not_approved')),default='pending')
-
+    donation_id = models.CharField(max_length=200,default='')
     def __str__(self) -> str:
         return self.user_email_id
     

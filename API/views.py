@@ -1270,20 +1270,31 @@ class Handle_WidthDraw(APIView):
             account_holder_name = request.data['account_holder_name']
             ifsc_code = request.data['ifsc_code']
             user_email_id = request.data['user_email_id']
+            donation_id = request.data['donation_id']
             amount = request.data['amount']
             try:
                 newWithdrawRequest = WithDraw_Requests.objects.create(account_number=account_number,
                                                                       account_holder_name=account_holder_name,
                                                                       ifsc_code=ifsc_code,
                                                                       user_email_id=user_email_id,
+                                                                      donation_id=donation_id,
                                                                       amount=amount)
                 newWithdrawRequest.save()
                 return JsonResponse({'status':'success'})
             except:
                 return JsonResponse({'status':'failed','error':'request cannot be made successfully'})
         except:
-            return JsonResponse({'status':'failed','Required':'account_number, account_holder_name, ifsc_code, user_email_id, amount'})
-        return JsonResponse({'status':'success'})
+            return JsonResponse({'status':'failed','Required':'account_number, account_holder_name,donation_id, ifsc_code, user_email_id, amount'})
+    def put(self,request,donation_id,status):
+        try:
+            print(donation_id)
+            WithdrawalRequest = WithDraw_Requests.objects.get(donation_id=donation_id)
+            WithdrawalRequest.status = status
+            WithdrawalRequest.save()
+            return JsonResponse({'status':'success'})
+        except Exception as e:
+            return JsonResponse({'status':'failed','error':str(e)})
+        
 class Handle_Payment(APIView):
     def get(self,request,email):
         #******************************************************************************#
