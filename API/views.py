@@ -1150,8 +1150,9 @@ class Handle_myorders(APIView):
                 product_image_url       = request.data['product_image_url']
                 item_count              = request.data['item_count']
                 ordered_on              = request.data['ordered_on']
+                address_id              = request.data['address_id']
             except:
-                return JsonResponse({'status_code':'failed','Required fields':'product_name, product_description, product_price, product_image_url, item_count, ordered_on'})
+                return JsonResponse({'status_code':'failed','Required fields':'product_name, product_description, product_price, product_image_url, item_count, ordered_on,address_id'})
        
             try:
                 Orders.objects.create(email_id=email_id,
@@ -1160,6 +1161,7 @@ class Handle_myorders(APIView):
                                       product_price=product_price, 
                                       product_image_url=product_image_url,
                                       item_count = item_count,
+                                      address_id=address_id,
                                       ordered_on=ordered_on).save()
                 return JsonResponse({'status_code':'success','orders':'order places succesfully'})
             except Exception as e:

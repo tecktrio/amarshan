@@ -157,6 +157,8 @@ class Orders(models.Model):
     product_image_url   = models.CharField(max_length=500)
     item_count          = models.IntegerField()
     ordered_on          = models.CharField(max_length=300,default='')
+    address_id          = models.CharField(max_length=300,default='')
+    
     
     def __str__(self) -> str:
         return self.email_id
