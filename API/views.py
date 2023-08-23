@@ -15,8 +15,7 @@ API for Amarshan a whole new platform for donations
 # Neccessary Modules for this app
 # run pip install -r requirement.txt to install the modules
 
-import json
-
+from API.Decorators.request_counter import request_counter
 from modules import Bank_Accounts
 from modules import Bank_Account_Serializers
 from modules import render
@@ -491,6 +490,7 @@ class Upload(APIView):
             
             profile_url         = Users.objects.get(email=email_id).profile_url
             platform_list       = platform.split(',')
+            print(platform_list)
         except Exception as e:
             return JsonResponse({'Required fields':'email_id,platform, media_type, category, location, media_url, title, description, target','reason':str(e)})
         
@@ -517,6 +517,7 @@ class Upload(APIView):
                         platform.append('facebook')
                 except Exception as e:
                    pass
+            
             if 'youtube' in platform_list:
                 try:
                     self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
@@ -667,7 +668,8 @@ class Social_Media:
         else:
             print('post is availble at facebook id ',response.json().get('id'))
             return True
-        
+      
+    @request_counter
     def Upload_video_to_youtube(self, video_url,title,description,tag):
         #******************************************************************************#
         #   Required Fields                                                            #
@@ -675,10 +677,14 @@ class Social_Media:
         '''Required parameters
         => video_url, title, description, tag
         '''
+        print('Trying to download the content from the requested url...')
         chuck_size = 256
         
         # downloading video from url
-        downloaded_video = requests.get(video_url,stream=True)
+        try:
+            downloaded_video = requests.get(video_url,stream=True)
+        except:
+            print('Invalid contect Url Dectected')
         print('Starting to download video from the url, please wait... ',video_url,end="")
         try:
             os.remove('live_yt.mp4')
@@ -1261,6 +1267,7 @@ class Handle_Storage(APIView):
         Storage.objects.create(media=media).save()
         url = 'https://amarshan.s3.ap-northeast-1.amazonaws.com/media/'+media.name
         return JsonResponse({'status_code':'success','url':url})
+    
 class Handle_WidthDraw(APIView):
     def get(self,request):
         requests = WithDraw_Requests.objects.all()

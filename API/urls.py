@@ -17,7 +17,7 @@ urlpatterns = [
 
     # handle donation urls
     path('donations/<int:id>',              views.Donation_content.as_view()),
-    path('donations/filter/<str:filter>', views.Donation_content.as_view()),
+    path('donations/filter/<str:filter>',   views.Donation_content.as_view()),
     path('donations/upload',                views.Upload.as_view()),
     path('donations/categories',            views.Handle_Donation_categories.as_view()),
     path('donations/categories/<int:id>',   views.Handle_Donation_categories.as_view()),
@@ -29,7 +29,7 @@ urlpatterns = [
     
     # handle signup urls
     path('signup',                  views.SignUp.as_view()),
-    path('signup/<str:email_id>',   views.SignUp.as_view()),
+    path('updateprofile/<str:email_id>',                  views.SignUp.as_view()),
     
     # handling login urls
     path('login',views.Login.as_view()),
@@ -61,7 +61,6 @@ urlpatterns = [
     
     # handling notifications urls
     path('notifications',           views.Handle_Notifications.as_view()),
-    path('notifications/<int:id>',  views.Handle_Notifications.as_view()),
     path('notifications/<int:id>',  views.Handle_Notifications.as_view()),
     
     path('bank',  views.Handle_Bank_Accounts.as_view()),
