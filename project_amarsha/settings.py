@@ -83,9 +83,10 @@ DATABASES = DATABASES={
     'default':
         {
             'ENGINE':'django.db.backends.mysql',
-            'NAME': 'amarshan',
+            'NAME': 'atdb',
             'USER': 'root',
-            'PASSWORD': '1234',
+            'HOST':'amarshan-test-database.c9somgjlgozb.ap-northeast-1.rds.amazonaws.com',
+            'PASSWORD': 'amarshandevelopers',
          }
         }
 
