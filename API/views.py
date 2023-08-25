@@ -515,8 +515,11 @@ class Upload(APIView):
                     self.status = social_media.Upload_video_to_facebook(media_url,title,description)
                     if self.status:
                         platform.append('facebook')
+                    else:
+                        return JsonResponse({"status_code":'failed','status':'Content not uploaded','platform':'facebook'})
                 except Exception as e:
-                   pass
+                    return JsonResponse({"status_code":'failed','status':'Content not uploaded','platform':'facebook'})
+
             
             if 'youtube' in platform_list:
                 try:
@@ -577,24 +580,6 @@ class Upload(APIView):
 '''---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 '''
 class Social_Media:
-    
-    # thread for instagram video
-    def uploading_thread_method(self,video_container_id,access_token,page_id):
-        #******************************************************************************#
-        #    handle uploading thread of instagram                                      #
-        #*******************************************************************************
-        print('Startted uploading media to instagram...')
-        while requests.get("https://graph.facebook.com/{}?fields=status_code&access_token={}".format(video_container_id,access_token)).json().get('status_code')!="FINISHED":
-            time.sleep(1)
-        print('Media uploaded to instagram successfully')
-        print('Making the instagram video public accessable')
-        post_url = "https://graph.facebook.com/{}/media_publish?creation_id={}&access_token={}".format(page_id,video_container_id,access_token)
-        try:
-            response = requests.post(post_url)
-            print('post is available at instagram id : ',response.json().get('id'))
-            return True
-        except:
-            return False
         
     '''
      uploading video
@@ -640,17 +625,24 @@ class Social_Media:
         
         print('Got container id ',video_container_id)
         
-        #starting thread to upload
-        threading.Thread(target=self.uploading_thread_method,
-                         args=(video_container_id,
-                               ACCESS_TOKEN_FACEBOOK_PAGE,
-                               INSTAGRAM_BUSINESS_ACCOUNT_ID)).start()
-        return True
+        while requests.get("https://graph.facebook.com/{}?fields=status_code&access_token={}".format(video_container_id,ACCESS_TOKEN_FACEBOOK_PAGE)).json().get('status_code')!="FINISHED":
+            time.sleep(1)
+        print('Media uploaded to instagram successfully')
+        print('Making the instagram video public accessable')
+        post_url = "https://graph.facebook.com/{}/media_publish?creation_id={}&access_token={}".format(INSTAGRAM_BUSINESS_ACCOUNT_ID,video_container_id,ACCESS_TOKEN_FACEBOOK_PAGE)
+        try:
+            response = requests.post(post_url)
+            print('post is available at instagram id : ',response.json().get('id'))
+            return True
+        except:
+            return False
+
     
     def Upload_video_to_facebook(self,video_url,title,description):
         #******************************************************************************#
         #   upload video to facebook                                                   #
         #*******************************************************************************
+        print('Sending Request to facebook graph api....')
         url = f"https://graph.facebook.com/{FACEBOOK_PAGE_ID}/videos"
         
         # setting up the data to upload
@@ -660,14 +652,19 @@ class Social_Media:
             "description"   :description,
             "access_token"  :ACCESS_TOKEN_FACEBOOK_PAGE,
         }
-        
+               
         # sending request
-        response = requests.post(url,json=data)
-        if response.json().get('id') is None:
-            return False
-        else:
-            print('post is availble at facebook id ',response.json().get('id'))
-            return True
+        try:
+            response = requests.post(url,json=data)
+            if response.json().get('id') is None:
+                print('failed to upload video to facebook , reason - ',response.json().get('error').get('error_user_msg'))
+                return False
+            else:
+                print('post is availble at facebook id ',response.json().get('id'))
+                return True
+        except Exception as e:
+            print(e)
+       
       
     @request_counter
     def Upload_video_to_youtube(self, video_url,title,description,tag):
