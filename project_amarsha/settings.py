@@ -87,7 +87,14 @@ DATABASES = DATABASES={
             'USER': 'root',
             'HOST':'amarshan-test-database.c9somgjlgozb.ap-northeast-1.rds.amazonaws.com',
             'PASSWORD': 'amarshandevelopers',
-         }
+         },
+    # 'default':
+    #     {
+    #         'ENGINE':'django.db.backends.mysql',
+    #         'NAME':'amarshan',
+    #         'USER':'root',
+    #         'PASSWORD':'1234'
+    #     }
         }
 
 PASSWORD_HASHERS = [
