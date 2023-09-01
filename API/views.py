@@ -481,14 +481,14 @@ class Upload(APIView):
             description     = request.data['description']
             target          = int(request.data['target'])
             
-            # validating the category
-            if not Donation_categories.objects.filter(name=category).exists():
-                return JsonResponse({'status_code':'failed','error':'category do not exist'})
-            # validating the email id
-            if not Users.objects.filter(email=email_id).exists():
-                return JsonResponse({'status_code':'failed','error':'email do not exist'})
+            # # validating the category
+            # if not Donation_categories.objects.filter(name=category).exists():
+            #     return JsonResponse({'status_code':'failed','error':'category do not exist'})
+            # # validating the email id
+            # if not Users.objects.filter(email=email_id).exists():
+            #     return JsonResponse({'status_code':'failed','error':'email do not exist'})
             
-            profile_url         = Users.objects.get(email=email_id).profile_url
+            # profile_url         = Users.objects.get(email=email_id).profile_url
             platform_list       = platform.split(',')
             print(platform_list)
         except Exception as e:
@@ -503,27 +503,27 @@ class Upload(APIView):
         platform = []
         
         if media_type == "VIDEO":
-            if 'instagram' in platform_list:
-                try:
-                    self.status = social_media.Upload_video_to_instagram(media_url,title)
-                    if self.status:
-                        platform.append('instagram')
-                except Exception as e:
-                    pass
-            if 'facebook' in platform_list:
-                try:
-                    self.status = social_media.Upload_video_to_facebook(media_url,title,description)
-                    if self.status:
-                        platform.append('facebook')
-                    else:
-                        return JsonResponse({"status_code":'failed','status':'Content not uploaded','platform':'facebook'})
-                except Exception as e:
-                    return JsonResponse({"status_code":'failed','status':'Content not uploaded','platform':'facebook'})
+        #     if 'instagram' in platform_list:
+        #         try:
+        #             self.status = social_media.Upload_video_to_instagram(media_url,title)
+        #             if self.status:
+        #                 platform.append('instagram')
+        #         except Exception as e:
+        #             pass
+        #     if 'facebook' in platform_list:
+        #         try:
+        #             self.status = social_media.Upload_video_to_facebook(media_url,title,description)
+        #             if self.status:
+        #                 platform.append('facebook')
+        #             else:
+        #                 return JsonResponse({"status_code":'failed','status':'Content not uploaded','platform':'facebook'})
+        #         except Exception as e:
+        #             return JsonResponse({"status_code":'failed','status':'Content not uploaded','platform':'facebook'})
 
             
             if 'youtube' in platform_list:
                 try:
-                    self.status = social_media.Upload_video_to_youtube(media_url,title,description,category) 
+                    self.status = social_media.Upload_video_to_youtube(media_url,title,description,tag='charity,amarshan') 
                     if self.status:
                         platform.append('youtube')
                 except Exception as e:
@@ -532,38 +532,38 @@ class Upload(APIView):
                     platform.append('amarshan')                
         # handle image        
         elif media_type == "IMAGE":
-            if 'instagram' in platform_list:
-                try:
-                    self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
-                    if self.status:
-                        platform.append('instagram')
-                except Exception as e:
-                        pass
-            if 'facebook' in platform_list:
-                try:
-                    self.status = social_media.Upload_image_to_facebook(media_url,title )
-                    if self.status:
-                        platform.append('facebook')
-                except Exception as e:
-                        pass
+            # if 'instagram' in platform_list:
+            #     try:
+            #         self.status = social_media.Upload_image_to_instagram(image_url=media_url,caption=title)
+            #         if self.status:
+            #             platform.append('instagram')
+            #     except Exception as e:
+            #             pass
+            # if 'facebook' in platform_list:
+            #     try:
+            #         self.status = social_media.Upload_image_to_facebook(media_url,title )
+            #         if self.status:
+            #             platform.append('facebook')
+            #     except Exception as e:
+            #             pass
             if 'amarshan' in platform_list: 
                 try:
                     platform.append('amarshan')
                 except Exception as e:
                     pass
                 
-        Donations.objects.create(
-                media_url       = media_url,
-                media_type      = media_type,
-                title           = title, 
-                description     = description,
-                category        = category,
-                location        = location,
-                target          = target,
-                profile_url     = profile_url,
-                email_id        = email_id,
-                platform        = ','.join(platform)
-            ).save()
+        # Donations.objects.create(
+        #         media_url       = media_url,
+        #         media_type      = media_type,
+        #         title           = title, 
+        #         description     = description,
+        #         category        = category,
+        #         location        = location,
+        #         target          = target,
+        #         profile_url     = profile_url,
+        #         email_id        = email_id,
+        #         platform        = ','.join(platform)
+        #     ).save()
                     
         # return true if video uploaded to all platforms
         return JsonResponse({"status_code":'success','status':'Content are successfully uploaded','platform': str(','.join(platform))})
